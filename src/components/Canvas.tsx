@@ -4,13 +4,13 @@ const Canvas = () => {
   return (
     <Paper
       sx={{
-        // bgcolor: 'blue',
         display: 'flex',
         flex: 1,
-        borderRadius: 2
+        borderRadius: 2,
+        padding: 2,
       }}
     >
-      Canvas
+      Canvas placeholder
     </Paper>
   )
 }

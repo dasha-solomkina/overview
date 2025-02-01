@@ -6,7 +6,6 @@ const Export = () => {
     <Box
       sx={{
         display: 'flex',
-        flex: 1,
         justifyContent: 'end',
       }}
     >
