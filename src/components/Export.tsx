@@ -1,19 +1,20 @@
-import { Box, Button } from "@mui/material"
+import { SaveRounded } from '@mui/icons-material'
+import { Box, Button } from '@mui/material'
 
 const Export = () => {
-
-    return (
-      <Box 
-      sx={{ 
-        bgcolor: 'green',
+  return (
+    <Box
+      sx={{
         display: 'flex',
-        flex: 1
+        flex: 1,
+        justifyContent: 'end',
       }}
     >
-     <Button>Export</Button>
-
+      <Button variant="outlined" startIcon={<SaveRounded />}>
+        Export
+      </Button>
     </Box>
-    )
-  }
-  
-  export default Export
+  )
+}
+
+export default Export

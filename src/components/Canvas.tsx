@@ -1,18 +1,18 @@
-import { Box } from "@mui/material"
+import { Paper } from '@mui/material'
 
 const Canvas = () => {
-
-    return (
-      <Box 
-      sx={{ 
-        bgcolor: 'blue',
+  return (
+    <Paper
+      sx={{
+        // bgcolor: 'blue',
         display: 'flex',
-        flex: 1
+        flex: 1,
+        borderRadius: 2
       }}
     >
-       Canvas
-    </Box>
-    )
-  }
-  
-  export default Canvas
+      Canvas
+    </Paper>
+  )
+}
+
+export default Canvas
