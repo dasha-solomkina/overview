@@ -3,7 +3,7 @@ import {
   PolylineRounded,
   BrushRounded,
   CleaningServicesRounded,
-  UndoRounded,
+  UndoRounded
 } from '@mui/icons-material'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import NavbarButton from './NavbarButton'
@@ -17,10 +17,27 @@ const VisuallyHiddenInput = styled('input')({
   bottom: 0,
   left: 0,
   whiteSpace: 'nowrap',
-  width: 1,
+  width: 1
 })
 
-const Navbar = () => {
+type setImageProps = {
+  setImage: (image: string) => void
+}
+
+const Navbar = ({ setImage }: setImageProps) => {
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+
+    reader.onload = (e) => {
+      if (e.target?.result) {
+        setImage(e.target.result as string)
+      }
+    }
+  }
+
   return (
     <Box
       sx={{
@@ -30,7 +47,7 @@ const Navbar = () => {
         border: '1px solid rgba(0, 0, 0, 0.12)',
         borderRadius: 2,
         boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.12)',
-        p: 1,
+        p: 1
       }}
     >
       <NavbarButton
@@ -56,7 +73,8 @@ const Navbar = () => {
         Upload files
         <VisuallyHiddenInput
           type="file"
-          // onChange={(event) => console.log(event.target.files)}
+          accept="image/*"
+          onChange={handleImageUpload}
           multiple
         />
       </Button>

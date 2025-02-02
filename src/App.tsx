@@ -4,6 +4,7 @@ import Navbar from './components/Navbar'
 import ClassManager from './components/ClassManager'
 import Canvas from './components/Canvas'
 import Export from './components/Export'
+import { useState } from 'react'
 
 const MyContainer = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -11,7 +12,7 @@ const MyContainer = ({ children }: { children: React.ReactNode }) => {
       <Container
         sx={{
           // height: '100vh',
-          border: '1px solid black',
+          border: '1px solid black'
         }}
       >
         <Box
@@ -29,12 +30,14 @@ const MyContainer = ({ children }: { children: React.ReactNode }) => {
 }
 
 function App() {
+  const [image, setImage] = useState<string | null>(null)
+
   return (
     <MyContainer>
-      <Navbar />
+      <Navbar setImage={setImage} />
       <Box display="flex" width="100%" height="70%" gap={1}>
         <ClassManager />
-        <Canvas />
+        <Canvas image={image} />
       </Box>
       <Export />
     </MyContainer>
