@@ -15,19 +15,7 @@ import {
 import { useState } from 'react'
 import { HexColorPicker } from 'react-colorful'
 import NavbarButton from './NavbarButton'
-
-type ClassProps = {
-  id: string
-  name: string
-  color: string
-  superCategory?: string
-}
-
-const initialClasses = [
-  { id: uuidv4(), name: 'First Class', color: '#FF5733' },
-  { id: uuidv4(), name: 'Second Class', color: '#33FF57' },
-  { id: uuidv4(), name: 'Third Class', color: '#3357FF' }
-]
+import useStore, { type LabelProps } from '../store/useStore'
 
 const EditButton = styled(IconButton)(({ theme }) => ({
   opacity: 0,
@@ -35,13 +23,10 @@ const EditButton = styled(IconButton)(({ theme }) => ({
   color: theme.palette.secondary.main
 }))
 
-const ClassManager = () => {
+const LabelManager = () => {
+  const { labels, setLabels, editLabel, setEditLabel } = useStore() // will have to rename
   const [anchorEl, setAnchorEl] = useState<null | HTMLButtonElement>(null)
-  const [currentColor, setCurrentColor] = useState('#FFFFFF')
-  const [selectedClass, setSelectedClass] = useState<null | ClassProps>(null) // will have to rename
-  // const [classes, setClasses] = useState<ClassProps[]>([])
-  const [classes, setClasses] = useState(initialClasses)
-  // const [colorChosen, setColorChosen] = useState<[string | null]>([null])
+  const [currentColor, setCurrentColor] = useState('#FF0000')
 
   // fix later
   const [anchorElEdit, setAnchorElEdit] = useState<null | HTMLElement>(null)
@@ -50,11 +35,11 @@ const ClassManager = () => {
 
   const handlePopoverOpen = (
     event: React.MouseEvent<HTMLElement>,
-    classItem: ClassProps
+    LabelItem: LabelProps
   ) => {
-    setSelectedClass(classItem) // Set selected class
+    setEditLabel(LabelItem) // Set selected Label
     setAnchorElEdit(event.currentTarget)
-    setEditedTitle(classItem.name) // Set the edited title from the selected class name
+    setEditedTitle(LabelItem.name) // Set the edited title from the selected Label name
     setOpenPopoverEdit(true)
   }
 
@@ -70,35 +55,30 @@ const ClassManager = () => {
   }
 
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // setEditedTitle(event.target.value)
     const newTitle = event.target.value
     setEditedTitle(newTitle)
-    if (selectedClass) {
-      setClasses(
-        classes.map((cls) =>
-          cls.id === selectedClass.id ? { ...cls, name: newTitle } : cls
+    if (editLabel) {
+      setLabels(
+        labels.map((cls) =>
+          cls.id === editLabel.id ? { ...cls, name: newTitle } : cls
         )
       )
     }
   }
 
-  //
-
   const handleColorClick = (
     event: React.MouseEvent<HTMLButtonElement>,
-    classItem: ClassProps
+    LabelItem: LabelProps
   ) => {
     setAnchorEl(event.currentTarget)
-    setSelectedClass(classItem)
-    setCurrentColor(classItem.color)
+    setEditLabel(LabelItem)
+    setCurrentColor(LabelItem.color)
   }
 
   const handleColorChange = (color: string) => {
     setCurrentColor(color)
-    setClasses(
-      classes.map((cls) =>
-        cls.id === selectedClass?.id ? { ...cls, color } : cls
-      )
+    setLabels(
+      labels.map((cls) => (cls.id === editLabel?.id ? { ...cls, color } : cls))
     )
   }
 
@@ -106,16 +86,16 @@ const ClassManager = () => {
     setAnchorEl(null)
   }
 
-  const handleNewClassClick = () => {
-    const newClass = {
+  const handleNewLabelClick = () => {
+    const newLabel = {
       id: uuidv4(),
-      name: 'New Class (to edit)',
+      name: 'New Label (to edit)',
       color: 'red'
     }
-    setClasses((prevClasses) => [...prevClasses, newClass])
+    setLabels([...labels, newLabel])
   }
 
-  //  add the check for the color
+  //  TODO: add the check for the color
 
   return (
     <Box
@@ -128,21 +108,21 @@ const ClassManager = () => {
     >
       <Box display="flex" alignItems="center" justifyContent="space-between">
         <Typography fontSize="1.1rem" fontWeight={600}>
-          Classes
+          Labels
         </Typography>
         <NavbarButton
           icon={AddCircleOutlineRounded}
-          title="Add class"
-          ariaLabel="addClass"
-          onClick={handleNewClassClick}
+          title="Add Label"
+          ariaLabel="addLabel"
+          onClick={handleNewLabelClick}
         />
       </Box>
       <Divider sx={{ mr: 2 }} />
 
       <List>
-        {classes.map((classItem) => (
+        {labels.map((LabelItem) => (
           <ListItem
-            key={classItem.id}
+            key={LabelItem.id}
             sx={{
               display: 'flex',
               alignItems: 'center',
@@ -150,18 +130,18 @@ const ClassManager = () => {
             }}
           >
             <ListItemText
-              primary={classItem.name}
+              primary={LabelItem.name}
               sx={{
                 overflow: 'hidden',
                 whiteSpace: 'nowrap',
-                textOverflow: 'ellipsis' // fix later
+                textOverflow: 'ellipsis' // TODO: fix later
               }}
             />
             <IconButton
               disableRipple
-              onClick={(e) => handleColorClick(e, classItem)}
+              onClick={(e) => handleColorClick(e, LabelItem)}
               sx={{
-                backgroundColor: `${classItem.color}`,
+                backgroundColor: `${LabelItem.color}`,
                 width: 12,
                 height: 12,
                 borderRadius: '50%',
@@ -173,7 +153,7 @@ const ClassManager = () => {
               className="edit-icon"
               disableRipple
               size="small"
-              onClick={(e) => handlePopoverOpen(e, classItem)}
+              onClick={(e) => handlePopoverOpen(e, LabelItem)}
             >
               <Edit fontSize="inherit" />
             </EditButton>
@@ -219,4 +199,4 @@ const ClassManager = () => {
   )
 }
 
-export default ClassManager
+export default LabelManager

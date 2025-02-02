@@ -1,6 +1,7 @@
 import { Paper } from '@mui/material'
-import { Canvas, FabricImage, Image } from 'fabric'
+import { Canvas, FabricImage } from 'fabric'
 import { useEffect, useRef, useState } from 'react'
+import Export from './Export'
 // import * as fabric from 'fabric'
 
 interface CanvasProps {
@@ -37,10 +38,22 @@ const CanvasApp = ({ image }: CanvasProps) => {
 
     FabricImage.fromURL(image)
       .then((img) => {
-        img.set({ left: 0, top: 0, selectable: true })
-        canvas?.clear() // Clear previous images before adding a new one
-        canvas?.add(img)
-        canvas?.renderAll()
+        if (!canvas) return
+
+        const canvasWidth = canvas.getWidth()
+        const canvasHeight = canvas.getHeight()
+
+        const imgWidth = img.width
+        const imgHeight = img.height
+
+        const scale = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight)
+        img.scale(scale)
+
+        canvas.clear() // remove previous images
+        canvas.add(img)
+        canvas.centerObject(img)
+        img.setCoords()
+        canvas.renderAll()
       })
       .catch((error) => console.error('Failed to load image:', error))
   }, [image, canvas])
@@ -49,14 +62,25 @@ const CanvasApp = ({ image }: CanvasProps) => {
     <Paper
       sx={{
         display: 'flex',
+        flexDirection: 'column',
         flex: 1,
         borderRadius: 2,
-        padding: 2
+        padding: 2,
+        gap: 3
       }}
     >
-      <div ref={containerRef} style={{ width: '100%', height: '100%' }}>
+      <div
+        ref={containerRef}
+        style={{
+          width: '100%',
+          height: '100%',
+          borderRadius: 4,
+          overflow: 'hidden'
+        }}
+      >
         <canvas id="canvas" ref={canvasRef} />
       </div>
+      <Export />
     </Paper>
   )
 }

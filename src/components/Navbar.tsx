@@ -47,7 +47,8 @@ const Navbar = ({ setImage }: setImageProps) => {
         border: '1px solid rgba(0, 0, 0, 0.12)',
         borderRadius: 2,
         boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.12)',
-        p: 1
+        py: 1,
+        px: 2
       }}
     >
       <NavbarButton

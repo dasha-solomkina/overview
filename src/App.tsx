@@ -3,17 +3,18 @@ import { Box, Container } from '@mui/material'
 import Navbar from './components/Navbar'
 import ClassManager from './components/ClassManager'
 import Canvas from './components/Canvas'
-import Export from './components/Export'
 import { useState } from 'react'
 
 const MyContainer = ({ children }: { children: React.ReactNode }) => {
   return (
     <Box bgcolor="background.default">
       <Container
-        sx={{
-          // height: '100vh',
-          border: '1px solid black'
-        }}
+        sx={
+          {
+            // height: '100vh',
+            // border: '1px solid black' // TODO: remove
+          }
+        }
       >
         <Box
           display="flex"
@@ -35,11 +36,10 @@ function App() {
   return (
     <MyContainer>
       <Navbar setImage={setImage} />
-      <Box display="flex" width="100%" height="70%" gap={1}>
+      <Box display="flex" width="100%" height="80%" gap={1}>
         <ClassManager />
         <Canvas image={image} />
       </Box>
-      <Export />
     </MyContainer>
   )
 }
