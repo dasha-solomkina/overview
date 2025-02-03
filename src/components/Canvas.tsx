@@ -5,10 +5,10 @@ import Export from './Export'
 import useStore from '../store/useStore'
 import { alpha } from '@mui/system'
 
-const CanvasApp = () => {
+const CanvasApp = ({ canvas, setCanvas, actionHistory, setActionHistory }) => {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
-  const [canvas, setCanvas] = useState<Canvas | null>(null)
+  // const [canvas, setCanvas] = useState<Canvas | null>(null)
   const image = useStore((state) => state.image)
   const tool = useStore((state) => state.tool)
   const setPolygons = useStore((state) => state.setPolygons)
@@ -20,6 +20,8 @@ const CanvasApp = () => {
     right: number
     bottom: number
   } | null>(null)
+  // const [lastAction, setLastAction] = useState<any[]>([null])
+  // const [actionHistory, setActionHistory] = useState<any[][]>([])
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -109,6 +111,8 @@ const CanvasApp = () => {
 
           setPoints((prevPoints) => [...prevPoints, { x, y }])
 
+          // setLastAction(dot)
+
           // If there's a previous point, draw a line connecting it to the new point
           if (points.length > 0) {
             const lastPoint = points[points.length - 1]
@@ -118,6 +122,8 @@ const CanvasApp = () => {
               selectable: false
             })
             canvas?.add(tempLine)
+            // setLastAction([dot, tempLine])
+            setActionHistory((prevHistory) => [...prevHistory, [dot, tempLine]])
           }
         }
       }
@@ -168,6 +174,8 @@ const CanvasApp = () => {
             setPolygons({ labelId: chosenLabel.id, points: newPolygon })
 
             canvas?.add(polygon)
+            // setLastAction([polygon])
+            setActionHistory((prevHistory) => [...prevHistory, [polygon]])
 
             setPoints([])
           }
@@ -186,6 +194,26 @@ const CanvasApp = () => {
       }
     }
   }, [tool, points, canvas, chosenLabel, image, imageBounds, setPolygons])
+
+  // useEffect(() => {
+  //   if (tool === 'back' && lastAction) {
+  //     lastAction.map((action) => {
+  //       canvas?.remove(action)
+  //     })
+  //     setLastAction([null])
+  //   }
+  // }, [tool, canvas, lastAction])
+
+  useEffect(() => {
+    if (tool === 'back' && actionHistory.length > 0) {
+      const lastActions = actionHistory[actionHistory.length - 1] // Get last actions
+
+      for (const action of lastActions) {
+        canvas?.remove(action) // Remove from canvas
+      }
+      setActionHistory((prevHistory) => prevHistory.slice(0, -1)) // Remove last action from history
+    }
+  }, [tool, canvas, actionHistory])
 
   return (
     <Paper

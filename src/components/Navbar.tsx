@@ -21,7 +21,13 @@ const VisuallyHiddenInput = styled('input')({
   width: 1
 })
 
-const Navbar = () => {
+type NavbarProps = {
+  onUndoClick: () => void
+  canUndo: boolean
+}
+
+// const Navbar = () => {
+const Navbar = ({ onUndoClick, canUndo }: NavbarProps) => {
   const setImage = useStore((state) => state.setImage)
   const setTool = useStore((state) => state.setTool)
 
@@ -73,7 +79,9 @@ const Navbar = () => {
         icon={UndoRounded}
         title="Back"
         ariaLabel="back"
-        onClick={() => setTool('back')}
+        // onClick={() => setTool('back')}
+        onClick={onUndoClick}
+        disabled={!canUndo}
       />
 
       <Button

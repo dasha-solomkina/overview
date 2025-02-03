@@ -22,6 +22,7 @@ type NavbarButton = {
   title: string
   ariaLabel: string
   onClick: VoidFunction
+  disabled?: boolean
 }
 
 const NavbarButton = ({
