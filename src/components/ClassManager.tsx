@@ -24,7 +24,13 @@ const EditButton = styled(IconButton)(({ theme }) => ({
 }))
 
 const LabelManager = () => {
-  const { labels, setLabels, editLabel, setEditLabel } = useStore() // will have to rename
+  const labels = useStore((state) => state.labels)
+  const setLabels = useStore((state) => state.setLabels)
+  const editLabel = useStore((state) => state.editLabel)
+  const setEditLabel = useStore((state) => state.setEditLabel)
+  const chosenLabel = useStore((state) => state.chosenLabel)
+  const setChosenLabel = useStore((state) => state.setChosenLabel)
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLButtonElement>(null)
   const [currentColor, setCurrentColor] = useState('#FF0000')
 
@@ -37,9 +43,9 @@ const LabelManager = () => {
     event: React.MouseEvent<HTMLElement>,
     LabelItem: LabelProps
   ) => {
-    setEditLabel(LabelItem) // Set selected Label
+    setEditLabel(LabelItem)
     setAnchorElEdit(event.currentTarget)
-    setEditedTitle(LabelItem.name) // Set the edited title from the selected Label name
+    setEditedTitle(LabelItem.name)
     setOpenPopoverEdit(true)
   }
 
@@ -97,6 +103,9 @@ const LabelManager = () => {
 
   //  TODO: add the check for the color
 
+  console.log(chosenLabel)
+  console.log(chosenLabel)
+
   return (
     <Box
       sx={{
@@ -126,8 +135,15 @@ const LabelManager = () => {
             sx={{
               display: 'flex',
               alignItems: 'center',
-              '&:hover .edit-icon': { opacity: 1 }
+              '&:hover .edit-icon': { opacity: 1 },
+              borderRadius: 2,
+              cursor: 'pointer',
+              backgroundColor:
+                chosenLabel?.id === LabelItem.id
+                  ? 'rgba(105, 0, 204, 0.1)'
+                  : 'transparent'
             }}
+            onClick={() => setChosenLabel(LabelItem)}
           >
             <ListItemText
               primary={LabelItem.name}

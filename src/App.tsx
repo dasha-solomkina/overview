@@ -3,7 +3,6 @@ import { Box, Container } from '@mui/material'
 import Navbar from './components/Navbar'
 import ClassManager from './components/ClassManager'
 import Canvas from './components/Canvas'
-import { useState } from 'react'
 
 const MyContainer = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -31,14 +30,12 @@ const MyContainer = ({ children }: { children: React.ReactNode }) => {
 }
 
 function App() {
-  const [image, setImage] = useState<string | null>(null)
-
   return (
     <MyContainer>
-      <Navbar setImage={setImage} />
+      <Navbar />
       <Box display="flex" width="100%" height="80%" gap={1}>
         <ClassManager />
-        <Canvas image={image} />
+        <Canvas />
       </Box>
     </MyContainer>
   )

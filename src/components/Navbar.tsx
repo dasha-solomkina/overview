@@ -7,6 +7,7 @@ import {
 } from '@mui/icons-material'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import NavbarButton from './NavbarButton'
+import useStore from '../store/useStore'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -20,11 +21,10 @@ const VisuallyHiddenInput = styled('input')({
   width: 1
 })
 
-type setImageProps = {
-  setImage: (image: string) => void
-}
+const Navbar = () => {
+  const setImage = useStore((state) => state.setImage)
+  const setTool = useStore((state) => state.setTool)
 
-const Navbar = ({ setImage }: setImageProps) => {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
@@ -55,14 +55,26 @@ const Navbar = ({ setImage }: setImageProps) => {
         icon={PolylineRounded}
         title="Polygon"
         ariaLabel="polygon"
+        onClick={() => setTool('polygon')}
       />
-      <NavbarButton icon={BrushRounded} title="Brush" ariaLabel="brush" />
+      <NavbarButton
+        icon={BrushRounded}
+        title="Brush"
+        ariaLabel="brush"
+        onClick={() => setTool('brush')}
+      />
       <NavbarButton
         icon={CleaningServicesRounded}
         title="Erase"
         ariaLabel="erase"
+        onClick={() => setTool('erase')}
       />
-      <NavbarButton icon={UndoRounded} title="Back" ariaLabel="back" />
+      <NavbarButton
+        icon={UndoRounded}
+        title="Back"
+        ariaLabel="back"
+        onClick={() => setTool('back')}
+      />
 
       <Button
         component="label"

@@ -19,19 +19,23 @@ type BrushStroke = {
 
 type StorePops = {
   image: string | null
-  tool: 'polygon' | 'brush' | 'eraser' | null
+  tool: 'polygon' | 'brush' | 'erase' | 'back' | null
   editLabel: LabelProps | null
   labels: LabelProps[]
+  chosenLabel: LabelProps | null
   polygons: Polygon[]
   brushStrokes: BrushStroke[]
 
   setImage: (image: string) => void
-  setTool: (tool: 'polygon' | 'brush' | 'eraser' | null) => void
+  setTool: (tool: 'polygon' | 'brush' | 'erase' | 'back' | null) => void
   setEditLabel: (label: LabelProps) => void
-  setLabels: (label: LabelProps[]) => void
+  setLabels: (labels: LabelProps[]) => void
+  setChosenLabel: (labels: LabelProps | null) => void
   addPolygon: (polygon: Polygon) => void
   addBrushStroke: (stroke: BrushStroke) => void
 }
+
+// todo Brush stroke
 
 const useStore = create<StorePops>((set) => ({
   image: null,
@@ -41,13 +45,22 @@ const useStore = create<StorePops>((set) => ({
     { id: uuidv4(), name: 'Label 1', color: '#FF0000' },
     { id: uuidv4(), name: 'Label 2', color: '#00FF00' }
   ],
+  chosenLabel: null,
   polygons: [],
   brushStrokes: [],
 
   setImage: (image) => set({ image }),
-  setTool: (tool) => set({ tool }),
+  setTool: (tool) =>
+    set((state) => ({
+      tool: state.tool === tool ? null : tool
+    })),
   setEditLabel: (label) => set({ editLabel: label }),
   setLabels: (labels) => set(() => ({ labels })),
+  setChosenLabel: (chosenLabel) =>
+    set((state) => ({
+      chosenLabel: state.chosenLabel === chosenLabel ? null : chosenLabel
+    })),
+
   addPolygon: (polygon) =>
     set((state) => ({ polygons: [...state.polygons, polygon] })),
   addBrushStroke: (stroke) =>
