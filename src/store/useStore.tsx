@@ -8,7 +8,7 @@ export type LabelProps = {
 }
 
 type Polygon = {
-  labelId: number
+  labelId: string
   points: { x: number; y: number }[]
 }
 
@@ -31,7 +31,7 @@ type StorePops = {
   setEditLabel: (label: LabelProps) => void
   setLabels: (labels: LabelProps[]) => void
   setChosenLabel: (labels: LabelProps | null) => void
-  addPolygon: (polygon: Polygon) => void
+  setPolygons: (polygon: Polygon) => void
   addBrushStroke: (stroke: BrushStroke) => void
 }
 
@@ -61,7 +61,7 @@ const useStore = create<StorePops>((set) => ({
       chosenLabel: state.chosenLabel === chosenLabel ? null : chosenLabel
     })),
 
-  addPolygon: (polygon) =>
+  setPolygons: (polygon) =>
     set((state) => ({ polygons: [...state.polygons, polygon] })),
   addBrushStroke: (stroke) =>
     set((state) => ({ brushStrokes: [...state.brushStrokes, stroke] }))

@@ -103,9 +103,6 @@ const LabelManager = () => {
 
   //  TODO: add the check for the color
 
-  console.log(chosenLabel)
-  console.log(chosenLabel)
-
   return (
     <Box
       sx={{

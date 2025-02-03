@@ -11,9 +11,15 @@ const CanvasApp = () => {
   const [canvas, setCanvas] = useState<Canvas | null>(null)
   const image = useStore((state) => state.image)
   const tool = useStore((state) => state.tool)
+  const setPolygons = useStore((state) => state.setPolygons)
   const chosenLabel = useStore((state) => state.chosenLabel)
   const [points, setPoints] = useState<{ x: number; y: number }[]>([])
-  const [lines, setLines] = useState<Line[]>([]) // To store the temporary lines
+  const [imageBounds, setImageBounds] = useState<{
+    left: number
+    top: number
+    right: number
+    bottom: number
+  } | null>(null)
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -59,20 +65,38 @@ const CanvasApp = () => {
         img.selectable = false
         img.hoverCursor = 'default'
         canvas.renderAll()
+        console.log('image x', img.left)
+        console.log('image y', img.top)
+
+        setImageBounds({
+          left: img.left,
+          top: img.top,
+          right: img.left + img.getScaledWidth(),
+          bottom: img.top + img.getScaledHeight()
+        })
       })
       .catch((error) => console.error('Failed to load image:', error))
   }, [image, canvas])
 
   // Handle tool change (Polygon tool)
   useEffect(() => {
-    if (tool === 'polygon' && canvas && chosenLabel) {
+    if (tool === 'polygon' && canvas && chosenLabel && image) {
       let tempLine: Line | null = null
 
       const onMouseDown = (event: any) => {
+        if (!canvas || !imageBounds) return
+
         const pointer = canvas?.getScenePoint(event.e)
         if (pointer) {
           const { x, y } = pointer
-          console.log(points)
+          if (
+            x < imageBounds.left ||
+            x > imageBounds.right ||
+            y < imageBounds.top ||
+            y > imageBounds.bottom
+          ) {
+            return
+          }
 
           // Create a dot at the clicked position
           const dot = new Circle({
@@ -94,7 +118,6 @@ const CanvasApp = () => {
               selectable: false
             })
             canvas?.add(tempLine)
-            setLines((prevLines) => [...prevLines, tempLine]) // Store line
           }
         }
       }
@@ -104,6 +127,7 @@ const CanvasApp = () => {
         const pointer = canvas?.getScenePoint(event.e)
         if (pointer) {
           const { x, y } = pointer
+
           tempLine.set({ x2: x, y2: y }) // Update the line end point to current mouse position
           canvas?.renderAll()
         }
@@ -121,7 +145,11 @@ const CanvasApp = () => {
             (x - firstPoint.x) ** 2 + (y - firstPoint.y) ** 2
           )
 
-          if (distance < 10) {
+          if (distance < 8) {
+            if (!imageBounds) {
+              console.error('imageBounds is not defined')
+              return
+            }
             // Clicked near the first point, close the polygon
             const polygon = new Polygon(points, {
               fill: alpha(chosenLabel.color, 0.2),
@@ -132,13 +160,16 @@ const CanvasApp = () => {
               hasControls: false,
               hoverCursor: 'default'
             })
+
+            const newPolygon = points.map((point) => ({
+              x: point.x - imageBounds.left,
+              y: point.y - imageBounds.top
+            }))
+            setPolygons({ labelId: chosenLabel.id, points: newPolygon })
+
             canvas?.add(polygon)
 
-            console.log(points)
-
-            // Reset points and lines after creating the polygon
             setPoints([])
-            setLines([])
           }
         }
       }
@@ -154,7 +185,7 @@ const CanvasApp = () => {
         canvas?.off('mouse:down', onFirstDotClick)
       }
     }
-  }, [tool, points, canvas, chosenLabel])
+  }, [tool, points, canvas, chosenLabel, image, imageBounds, setPolygons])
 
   return (
     <Paper
