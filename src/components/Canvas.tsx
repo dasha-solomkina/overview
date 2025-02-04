@@ -7,6 +7,7 @@ import { alpha } from '@mui/system'
 import { BackButton } from './Buttons'
 import generateCocoJson from '../utils/generateCocoJson'
 import { validateCOCOJSON } from '../services/validateCoco'
+import SuccessAlert, { ErrorExportAlert } from './Alert'
 
 const CanvasApp = () => {
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -28,6 +29,8 @@ const CanvasApp = () => {
     bottom: number
   } | null>(null)
 
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false)
+  const [showFailExportAlert, setShowFailExportAlert] = useState(false)
   const [actionHistory, setActionHistory] = useState<any[][]>([])
 
   console.log('po;ygons', polygons)
@@ -245,9 +248,20 @@ const CanvasApp = () => {
 
     console.log('Generated COCO JSON:', cocoJSON)
 
-    // Send to Flask API for validation
     const validationResult = await validateCOCOJSON(cocoJSON)
     console.log('Validation Result:', validationResult)
+
+    if (!validationResult.message === 'Success') {
+      setShowSuccessAlert(true)
+      setTimeout(() => {
+        setShowSuccessAlert(false)
+      }, 3000)
+    } else {
+      setShowFailExportAlert(true)
+      setTimeout(() => {
+        setShowFailExportAlert(false)
+      }, 3000)
+    }
   }
 
   return (
@@ -287,6 +301,9 @@ const CanvasApp = () => {
         />
         <Export onClick={handleExport} />
       </Box>
+
+      {showSuccessAlert && <SuccessAlert />}
+      {showFailExportAlert && <ErrorExportAlert />}
     </Paper>
   )
 }
