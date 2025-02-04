@@ -2,11 +2,11 @@ import { Box, Button, styled } from '@mui/material'
 import {
   PolylineRounded,
   BrushRounded,
-  CleaningServicesRounded,
-  UndoRounded
+  CleaningServicesRounded
+  // UndoRounded
 } from '@mui/icons-material'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
-import NavbarButton from './NavbarButton'
+import NavbarButton from './Buttons'
 import useStore from '../store/useStore'
 
 const VisuallyHiddenInput = styled('input')({
@@ -21,17 +21,14 @@ const VisuallyHiddenInput = styled('input')({
   width: 1
 })
 
-type NavbarProps = {
-  onUndoClick: () => void
-  canUndo: boolean
-}
-
 // const Navbar = () => {
-const Navbar = ({ onUndoClick, canUndo }: NavbarProps) => {
+const Navbar = () => {
   const setImage = useStore((state) => state.setImage)
   const setTool = useStore((state) => state.setTool)
+  const resetStore = useStore((state) => state.resetStore)
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const onNewImgClick = (event: React.ChangeEvent<HTMLInputElement>) => {
+    resetStore()
     const file = event.target.files?.[0]
     if (!file) return
     const reader = new FileReader()
@@ -75,14 +72,6 @@ const Navbar = ({ onUndoClick, canUndo }: NavbarProps) => {
         ariaLabel="erase"
         onClick={() => setTool('erase')}
       />
-      <NavbarButton
-        icon={UndoRounded}
-        title="Back"
-        ariaLabel="back"
-        // onClick={() => setTool('back')}
-        onClick={onUndoClick}
-        disabled={!canUndo}
-      />
 
       <Button
         component="label"
@@ -95,7 +84,7 @@ const Navbar = ({ onUndoClick, canUndo }: NavbarProps) => {
         <VisuallyHiddenInput
           type="file"
           accept="image/*"
-          onChange={handleImageUpload}
+          onChange={onNewImgClick}
           multiple
         />
       </Button>

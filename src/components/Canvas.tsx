@@ -1,14 +1,15 @@
-import { Paper } from '@mui/material'
+import { Box, Paper } from '@mui/material'
 import { Canvas, Circle, FabricImage, Line, Polygon } from 'fabric'
 import { useEffect, useRef, useState } from 'react'
 import Export from './Export'
 import useStore from '../store/useStore'
 import { alpha } from '@mui/system'
+import { BackButton } from './Buttons'
 
-const CanvasApp = ({ canvas, setCanvas, actionHistory, setActionHistory }) => {
+const CanvasApp = () => {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
-  // const [canvas, setCanvas] = useState<Canvas | null>(null)
+  const [canvas, setCanvas] = useState<Canvas | null>(null)
   const image = useStore((state) => state.image)
   const tool = useStore((state) => state.tool)
   const setPolygons = useStore((state) => state.setPolygons)
@@ -20,8 +21,19 @@ const CanvasApp = ({ canvas, setCanvas, actionHistory, setActionHistory }) => {
     right: number
     bottom: number
   } | null>(null)
-  // const [lastAction, setLastAction] = useState<any[]>([null])
-  // const [actionHistory, setActionHistory] = useState<any[][]>([])
+
+  const [actionHistory, setActionHistory] = useState<any[][]>([])
+
+  const onBackClick = () => {
+    if (actionHistory.length === 0) return
+
+    const lastAction = actionHistory[actionHistory.length - 1]
+    for (const object of lastAction) {
+      canvas?.remove(object)
+    }
+    setActionHistory((prevHistory) => prevHistory.slice(0, -1))
+    canvas?.renderAll()
+  }
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -60,6 +72,7 @@ const CanvasApp = ({ canvas, setCanvas, actionHistory, setActionHistory }) => {
         img.scale(scale)
 
         canvas.clear() // remove previous images
+        setPoints([]) // reset the points
         canvas.add(img)
         canvas.centerObject(img)
         img.setCoords()
@@ -104,14 +117,25 @@ const CanvasApp = ({ canvas, setCanvas, actionHistory, setActionHistory }) => {
           const dot = new Circle({
             radius: 3,
             fill: chosenLabel?.color,
-            left: x - 3, // Center the dot
-            top: y - 3 // Center the dot
+            left: x - 3,
+            top: y - 3,
+            selectable: false,
+            hoverCursor: 'default',
+            evented: false,
+            hasControls: false
           })
           canvas?.add(dot)
 
           setPoints((prevPoints) => [...prevPoints, { x, y }])
 
-          // setLastAction(dot)
+          // Workaround the polygon for undo button
+          const isPolygonBefore =
+            actionHistory.length > 1 &&
+            actionHistory[actionHistory.length - 1][0].type === 'polygon'
+
+          if (actionHistory.length === 0 || isPolygonBefore) {
+            setActionHistory((prevHistory) => [...prevHistory, [dot]])
+          }
 
           // If there's a previous point, draw a line connecting it to the new point
           if (points.length > 0) {
@@ -119,10 +143,12 @@ const CanvasApp = ({ canvas, setCanvas, actionHistory, setActionHistory }) => {
             tempLine = new Line([lastPoint.x, lastPoint.y, x, y], {
               stroke: chosenLabel?.color,
               strokeWidth: 2,
-              selectable: false
+              selectable: false,
+              hoverCursor: 'default',
+              evented: false,
+              hasControls: false
             })
             canvas?.add(tempLine)
-            // setLastAction([dot, tempLine])
             setActionHistory((prevHistory) => [...prevHistory, [dot, tempLine]])
           }
         }
@@ -174,7 +200,7 @@ const CanvasApp = ({ canvas, setCanvas, actionHistory, setActionHistory }) => {
             setPolygons({ labelId: chosenLabel.id, points: newPolygon })
 
             canvas?.add(polygon)
-            // setLastAction([polygon])
+            // setActionHistory([[polygon]])
             setActionHistory((prevHistory) => [...prevHistory, [polygon]])
 
             setPoints([])
@@ -193,27 +219,16 @@ const CanvasApp = ({ canvas, setCanvas, actionHistory, setActionHistory }) => {
         canvas?.off('mouse:down', onFirstDotClick)
       }
     }
-  }, [tool, points, canvas, chosenLabel, image, imageBounds, setPolygons])
-
-  // useEffect(() => {
-  //   if (tool === 'back' && lastAction) {
-  //     lastAction.map((action) => {
-  //       canvas?.remove(action)
-  //     })
-  //     setLastAction([null])
-  //   }
-  // }, [tool, canvas, lastAction])
-
-  useEffect(() => {
-    if (tool === 'back' && actionHistory.length > 0) {
-      const lastActions = actionHistory[actionHistory.length - 1] // Get last actions
-
-      for (const action of lastActions) {
-        canvas?.remove(action) // Remove from canvas
-      }
-      setActionHistory((prevHistory) => prevHistory.slice(0, -1)) // Remove last action from history
-    }
-  }, [tool, canvas, actionHistory])
+  }, [
+    tool,
+    points,
+    canvas,
+    chosenLabel,
+    image,
+    imageBounds,
+    setPolygons,
+    actionHistory
+  ])
 
   return (
     <Paper
@@ -226,7 +241,7 @@ const CanvasApp = ({ canvas, setCanvas, actionHistory, setActionHistory }) => {
         gap: 3
       }}
     >
-      <div
+      <Box
         ref={containerRef}
         style={{
           width: '100%',
@@ -236,8 +251,22 @@ const CanvasApp = ({ canvas, setCanvas, actionHistory, setActionHistory }) => {
         }}
       >
         <canvas id="canvas" ref={canvasRef} />
-      </div>
-      <Export />
+      </Box>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}
+      >
+        <BackButton
+          title="Undo"
+          ariaLabel="undo"
+          onClick={onBackClick}
+          disabled={actionHistory?.length === 0}
+        />
+        <Export />
+      </Box>
     </Paper>
   )
 }

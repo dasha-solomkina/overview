@@ -14,7 +14,7 @@ import {
 } from '@mui/material'
 import { useState } from 'react'
 import { HexColorPicker } from 'react-colorful'
-import NavbarButton from './NavbarButton'
+import NavbarButton from './Buttons'
 import useStore, { type LabelProps } from '../store/useStore'
 
 const EditButton = styled(IconButton)(({ theme }) => ({
@@ -39,7 +39,7 @@ const LabelManager = () => {
   const [openPopoverEdit, setOpenPopoverEdit] = useState<boolean>(false)
   const [editedTitle, setEditedTitle] = useState<string>('Initial Title')
 
-  const handlePopoverOpen = (
+  const onPopoverOpen = (
     event: React.MouseEvent<HTMLElement>,
     LabelItem: LabelProps
   ) => {
@@ -49,18 +49,18 @@ const LabelManager = () => {
     setOpenPopoverEdit(true)
   }
 
-  const handlePopoverClose = () => {
+  const onPopoverClose = () => {
     setOpenPopoverEdit(false)
   }
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
       event.preventDefault()
       setOpenPopoverEdit(false)
     }
   }
 
-  const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const onTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = event.target.value
     setEditedTitle(newTitle)
     if (editLabel) {
@@ -72,7 +72,7 @@ const LabelManager = () => {
     }
   }
 
-  const handleColorClick = (
+  const onColorClick = (
     event: React.MouseEvent<HTMLButtonElement>,
     LabelItem: LabelProps
   ) => {
@@ -81,18 +81,18 @@ const LabelManager = () => {
     setCurrentColor(LabelItem.color)
   }
 
-  const handleColorChange = (color: string) => {
+  const onColorChange = (color: string) => {
     setCurrentColor(color)
     setLabels(
       labels.map((cls) => (cls.id === editLabel?.id ? { ...cls, color } : cls))
     )
   }
 
-  const handleClose = () => {
+  const onClose = () => {
     setAnchorEl(null)
   }
 
-  const handleNewLabelClick = () => {
+  const onNewLabelClick = () => {
     const newLabel = {
       id: uuidv4(),
       name: 'New Label (to edit)',
@@ -120,7 +120,7 @@ const LabelManager = () => {
           icon={AddCircleOutlineRounded}
           title="Add Label"
           ariaLabel="addLabel"
-          onClick={handleNewLabelClick}
+          onClick={onNewLabelClick}
         />
       </Box>
       <Divider sx={{ mr: 2 }} />
@@ -152,7 +152,7 @@ const LabelManager = () => {
             />
             <IconButton
               disableRipple
-              onClick={(e) => handleColorClick(e, LabelItem)}
+              onClick={(e) => onColorClick(e, LabelItem)}
               sx={{
                 backgroundColor: `${LabelItem.color}`,
                 width: 12,
@@ -166,7 +166,7 @@ const LabelManager = () => {
               className="edit-icon"
               disableRipple
               size="small"
-              onClick={(e) => handlePopoverOpen(e, LabelItem)}
+              onClick={(e) => onPopoverOpen(e, LabelItem)}
             >
               <Edit fontSize="inherit" />
             </EditButton>
@@ -177,7 +177,7 @@ const LabelManager = () => {
       <Popover
         open={openPopoverEdit}
         anchorEl={anchorElEdit}
-        onClose={handlePopoverClose}
+        onClose={onPopoverClose}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'left'
@@ -185,19 +185,19 @@ const LabelManager = () => {
       >
         <TextField
           value={editedTitle}
-          onChange={handleTitleChange}
+          onChange={onTitleChange}
           sx={{
             padding: '10px'
           }}
-          onKeyDown={handleKeyDown}
-          onBlur={handlePopoverClose}
+          onKeyDown={onKeyDown}
+          onBlur={onPopoverClose}
         />
       </Popover>
 
       <Popover
         open={Boolean(anchorEl)}
         anchorEl={anchorEl}
-        onClose={handleClose}
+        onClose={onClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         sx={{
           '.MuiPopover-paper': {
@@ -206,7 +206,7 @@ const LabelManager = () => {
           }
         }}
       >
-        <HexColorPicker color={currentColor} onChange={handleColorChange} />
+        <HexColorPicker color={currentColor} onChange={onColorChange} />
       </Popover>
     </Box>
   )
