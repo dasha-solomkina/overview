@@ -1,5 +1,4 @@
 import { AddCircleOutlineRounded, Edit } from '@mui/icons-material'
-import { v4 as uuidv4 } from 'uuid'
 import {
   Box,
   Divider,
@@ -16,6 +15,7 @@ import { useState } from 'react'
 import { HexColorPicker } from 'react-colorful'
 import NavbarButton from './Buttons'
 import useStore, { type LabelProps } from '../store/useStore'
+import { generateRandomId } from '../utils/calculations'
 
 const EditButton = styled(IconButton)(({ theme }) => ({
   opacity: 0,
@@ -65,8 +65,8 @@ const LabelManager = () => {
     setEditedTitle(newTitle)
     if (editLabel) {
       setLabels(
-        labels.map((cls) =>
-          cls.id === editLabel.id ? { ...cls, name: newTitle } : cls
+        labels.map((label) =>
+          label.id === editLabel.id ? { ...label, name: newTitle } : label
         )
       )
     }
@@ -84,7 +84,9 @@ const LabelManager = () => {
   const onColorChange = (color: string) => {
     setCurrentColor(color)
     setLabels(
-      labels.map((cls) => (cls.id === editLabel?.id ? { ...cls, color } : cls))
+      labels.map((label) =>
+        label.id === editLabel?.id ? { ...label, color } : label
+      )
     )
   }
 
@@ -94,9 +96,9 @@ const LabelManager = () => {
 
   const onNewLabelClick = () => {
     const newLabel = {
-      id: uuidv4(),
+      id: generateRandomId(8),
       name: 'New Label (to edit)',
-      color: 'red'
+      color: '#0000FF'
     }
     setLabels([...labels, newLabel])
   }

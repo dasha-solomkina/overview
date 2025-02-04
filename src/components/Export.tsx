@@ -1,15 +1,15 @@
 import { SaveRounded } from '@mui/icons-material'
 import { Box, Button } from '@mui/material'
 
-const Export = () => {
+const Export = ({ onClick }: { onClick: () => void }) => {
   return (
     <Box
       sx={{
         display: 'flex',
-        justifyContent: 'end',
+        justifyContent: 'end'
       }}
     >
-      <Button variant="outlined" startIcon={<SaveRounded />}>
+      <Button onClick={onClick} variant="outlined" startIcon={<SaveRounded />}>
         Export
       </Button>
     </Box>

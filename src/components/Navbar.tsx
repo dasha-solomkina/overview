@@ -23,7 +23,7 @@ const VisuallyHiddenInput = styled('input')({
 
 // const Navbar = () => {
 const Navbar = () => {
-  const setImage = useStore((state) => state.setImage)
+  const setImageURL = useStore((state) => state.setImageURL)
   const setTool = useStore((state) => state.setTool)
   const resetStore = useStore((state) => state.resetStore)
 
@@ -36,7 +36,7 @@ const Navbar = () => {
 
     reader.onload = (e) => {
       if (e.target?.result) {
-        setImage(e.target.result as string)
+        setImageURL(e.target.result as string)
       }
     }
   }

@@ -5,15 +5,21 @@ import Export from './Export'
 import useStore from '../store/useStore'
 import { alpha } from '@mui/system'
 import { BackButton } from './Buttons'
+import generateCocoJson from '../utils/generateCocoJson'
+import { validateCOCOJSON } from '../services/validateCoco'
 
 const CanvasApp = () => {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [canvas, setCanvas] = useState<Canvas | null>(null)
-  const image = useStore((state) => state.image)
+  const imageURL = useStore((state) => state.imageURL)
   const tool = useStore((state) => state.tool)
   const setPolygons = useStore((state) => state.setPolygons)
+  const polygons = useStore((state) => state.polygons)
+  const labels = useStore((state) => state.labels)
   const chosenLabel = useStore((state) => state.chosenLabel)
+  const setImage = useStore((state) => state.setImage)
+  const image = useStore((state) => state.image)
   const [points, setPoints] = useState<{ x: number; y: number }[]>([])
   const [imageBounds, setImageBounds] = useState<{
     left: number
@@ -23,6 +29,8 @@ const CanvasApp = () => {
   } | null>(null)
 
   const [actionHistory, setActionHistory] = useState<any[][]>([])
+
+  console.log('po;ygons', polygons)
 
   const onBackClick = () => {
     if (actionHistory.length === 0) return
@@ -56,9 +64,9 @@ const CanvasApp = () => {
   }, [])
 
   useEffect(() => {
-    if (!image || !canvasRef.current) return
+    if (!imageURL || !canvasRef.current) return
 
-    FabricImage.fromURL(image)
+    FabricImage.fromURL(imageURL)
       .then((img) => {
         if (!canvas) return
 
@@ -80,8 +88,6 @@ const CanvasApp = () => {
         img.selectable = false
         img.hoverCursor = 'default'
         canvas.renderAll()
-        console.log('image x', img.left)
-        console.log('image y', img.top)
 
         setImageBounds({
           left: img.left,
@@ -89,13 +95,17 @@ const CanvasApp = () => {
           right: img.left + img.getScaledWidth(),
           bottom: img.top + img.getScaledHeight()
         })
+        setImage({
+          height: img.getScaledHeight(),
+          width: img.getScaledWidth()
+        })
       })
       .catch((error) => console.error('Failed to load image:', error))
-  }, [image, canvas])
+  }, [imageURL, canvas, setImage])
 
   // Handle tool change (Polygon tool)
   useEffect(() => {
-    if (tool === 'polygon' && canvas && chosenLabel && image) {
+    if (tool === 'polygon' && canvas && chosenLabel && imageURL) {
       let tempLine: Line | null = null
 
       const onMouseDown = (event: any) => {
@@ -200,7 +210,6 @@ const CanvasApp = () => {
             setPolygons({ labelId: chosenLabel.id, points: newPolygon })
 
             canvas?.add(polygon)
-            // setActionHistory([[polygon]])
             setActionHistory((prevHistory) => [...prevHistory, [polygon]])
 
             setPoints([])
@@ -224,11 +233,22 @@ const CanvasApp = () => {
     points,
     canvas,
     chosenLabel,
-    image,
+    imageURL,
     imageBounds,
     setPolygons,
     actionHistory
   ])
+
+  const handleExport = async () => {
+    if (!image) return
+    const cocoJSON = generateCocoJson(labels, image, polygons)
+
+    console.log('Generated COCO JSON:', cocoJSON)
+
+    // Send to Flask API for validation
+    const validationResult = await validateCOCOJSON(cocoJSON)
+    console.log('Validation Result:', validationResult)
+  }
 
   return (
     <Paper
@@ -265,7 +285,7 @@ const CanvasApp = () => {
           onClick={onBackClick}
           disabled={actionHistory?.length === 0}
         />
-        <Export />
+        <Export onClick={handleExport} />
       </Box>
     </Paper>
   )

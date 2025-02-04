@@ -1,14 +1,19 @@
 import { create } from 'zustand'
-import { v4 as uuidv4 } from 'uuid'
+
+export type Image = {
+  height: number
+  width: number
+}
 
 export type LabelProps = {
-  id: string
+  id: number
   name: string
   color: string
 }
 
-type Polygon = {
-  labelId: string
+export type Polygon = {
+  labelId: number
+  color?: string
   points: { x: number; y: number }[]
 }
 
@@ -18,7 +23,8 @@ type BrushStroke = {
 }
 
 type StorePops = {
-  image: string | undefined
+  imageURL: string | undefined
+  image: Image | undefined
   tool: 'polygon' | 'brush' | 'erase' | undefined
   editLabel: LabelProps | undefined
   labels: LabelProps[]
@@ -26,7 +32,8 @@ type StorePops = {
   polygons: Polygon[]
   brushStrokes: BrushStroke[]
 
-  setImage: (image: string) => void
+  setImageURL: (imageURL: string) => void
+  setImage: (image: Image) => void
   setTool: (tool: 'polygon' | 'brush' | 'erase' | undefined) => void
   setEditLabel: (label: LabelProps) => void
   setLabels: (labels: LabelProps[]) => void
@@ -40,17 +47,19 @@ type StorePops = {
 // TODO: Brush stroke
 
 const useStore = create<StorePops>((set) => ({
+  imageURL: undefined,
   image: undefined,
   tool: undefined,
   editLabel: undefined,
   labels: [
-    { id: uuidv4(), name: 'Label 1', color: '#FF0000' },
-    { id: uuidv4(), name: 'Label 2', color: '#00FF00' }
+    { id: 10293847, name: 'Label 1', color: '#FF0000' },
+    { id: 10293832, name: 'Label 2', color: '#00FF00' }
   ],
   chosenLabel: undefined,
   polygons: [],
   brushStrokes: [],
 
+  setImageURL: (imageURL) => set({ imageURL }),
   setImage: (image) => set({ image }),
   setTool: (tool) =>
     set((state) => ({
@@ -70,7 +79,7 @@ const useStore = create<StorePops>((set) => ({
 
   resetStore: () => {
     set({
-      image: undefined,
+      imageURL: undefined,
       tool: undefined,
       editLabel: undefined,
       // labels: [],
