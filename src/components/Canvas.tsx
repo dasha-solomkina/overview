@@ -1,5 +1,5 @@
 import { Box, Paper } from '@mui/material'
-import { Canvas, Circle, FabricImage, Line, Polygon } from 'fabric'
+import { Canvas, Circle, FabricImage, Line, PencilBrush, Polygon } from 'fabric'
 import { useEffect, useRef, useState } from 'react'
 import Export from './Export'
 import useStore from '../store/useStore'
@@ -241,6 +241,52 @@ const CanvasApp = () => {
     setPolygons,
     actionHistory
   ])
+
+  useEffect(() => {
+    if (tool === 'brush' && canvas && chosenLabel && imageURL) {
+      canvas.isDrawingMode = true
+      canvas.freeDrawingBrush = new PencilBrush(canvas)
+      canvas.freeDrawingBrush.width = 1
+      canvas.freeDrawingBrush.color = chosenLabel.color // Use chosen label color
+      canvas.freeDrawingBrush.limitedToCanvasSize = true
+      console.log('freeDrawingBrush', canvas.freeDrawingBrush)
+
+      canvas.on('mouse:move', (event) => {
+        const pointer = canvas.getScenePoint(event.e)
+        if (pointer && imageBounds) {
+          const { x, y } = pointer
+          if (
+            x < imageBounds.left ||
+            x > imageBounds.right ||
+            y < imageBounds.top ||
+            y > imageBounds.bottom
+          ) {
+            canvas.isDrawingMode = false // Disable drawing when outside bounds
+          } else {
+            canvas.isDrawingMode = true // Re-enable when inside bounds
+          }
+        }
+      })
+
+      const annotations = []
+      // console.log('annotations', annotations)
+
+      // Store brush strokes with class ID
+      const onPathCreated = (event) => {
+        const brushStroke = event.path
+        brushStroke.classId = chosenLabel.id // Assign class ID
+        annotations.push(brushStroke)
+        console.log('brushStroke', brushStroke)
+      }
+
+      canvas.on('path:created', onPathCreated)
+
+      return () => {
+        canvas.isDrawingMode = false
+        canvas.off('path:created', onPathCreated)
+      }
+    }
+  }, [tool, canvas, chosenLabel, imageBounds, imageURL])
 
   return (
     <Paper

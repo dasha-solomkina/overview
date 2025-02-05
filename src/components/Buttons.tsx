@@ -64,7 +64,7 @@ type StyledNavButton = {
   icon: SvgIconComponent
   title: string
   ariaLabel: string
-  onClick: VoidFunction
+  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void
 }
 
 const NavbarButton = ({

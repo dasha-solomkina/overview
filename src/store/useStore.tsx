@@ -31,6 +31,7 @@ type StorePops = {
   chosenLabel: LabelProps | undefined
   polygons: Polygon[]
   brushStrokes: BrushStroke[]
+  brushSize: number
 
   setImageURL: (imageURL: string) => void
   setImage: (image: Image) => void
@@ -41,6 +42,7 @@ type StorePops = {
   setPolygons: (polygon: Polygon) => void
   addBrushStroke: (stroke: BrushStroke) => void
 
+  setBrushSize: (brush: number) => void
   resetStore: () => void
 }
 
@@ -58,6 +60,7 @@ const useStore = create<StorePops>((set) => ({
   chosenLabel: undefined,
   polygons: [],
   brushStrokes: [],
+  brushSize: 18,
 
   setImageURL: (imageURL) => set({ imageURL }),
   setImage: (image) => set({ image }),
@@ -76,6 +79,7 @@ const useStore = create<StorePops>((set) => ({
     set((state) => ({ polygons: [...state.polygons, polygon] })),
   addBrushStroke: (stroke) =>
     set((state) => ({ brushStrokes: [...state.brushStrokes, stroke] })),
+  setBrushSize: (brushSize) => set({ brushSize }),
 
   resetStore: () => {
     set({
@@ -85,7 +89,8 @@ const useStore = create<StorePops>((set) => ({
       // labels: [],
       chosenLabel: undefined,
       polygons: [],
-      brushStrokes: []
+      brushStrokes: [],
+      brushSize: 8
     })
   }
 }))

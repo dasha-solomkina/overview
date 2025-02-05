@@ -1,4 +1,4 @@
-import { Box, Button, styled } from '@mui/material'
+import { Box, Button, Popover, styled } from '@mui/material'
 import {
   PolylineRounded,
   BrushRounded,
@@ -8,6 +8,8 @@ import {
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import NavbarButton from './Buttons'
 import useStore from '../store/useStore'
+import { useState } from 'react'
+import Slider from './Slider'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -26,6 +28,10 @@ const Navbar = () => {
   const setImageURL = useStore((state) => state.setImageURL)
   const setTool = useStore((state) => state.setTool)
   const resetStore = useStore((state) => state.resetStore)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLButtonElement>(null)
+  const onClose = () => {
+    setAnchorEl(null)
+  }
 
   const onNewImgClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     resetStore()
@@ -39,6 +45,11 @@ const Navbar = () => {
         setImageURL(e.target.result as string)
       }
     }
+  }
+
+  const onBrushClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget)
+    setTool('brush')
   }
 
   return (
@@ -64,7 +75,7 @@ const Navbar = () => {
         icon={BrushRounded}
         title="Brush"
         ariaLabel="brush"
-        onClick={() => setTool('brush')}
+        onClick={(event) => onBrushClick(event)}
       />
       <NavbarButton
         icon={CleaningServicesRounded}
@@ -88,6 +99,31 @@ const Navbar = () => {
           multiple
         />
       </Button>
+
+      <Popover
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        onClose={onClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        sx={{
+          '.MuiPopover-paper': {
+            overflow: 'hidden',
+            borderRadius: 2
+          }
+        }}
+      >
+        <Box
+          sx={{
+            width: 300,
+            px: 3,
+            height: 60,
+            display: 'flex',
+            alignItems: 'end'
+          }}
+        >
+          <Slider />
+        </Box>
+      </Popover>
     </Box>
   )
 }

@@ -32,7 +32,7 @@ const generateCocoJson = (
     info: {
       description: 'Take-home test Overview.ai',
       url: 'https://github.com/dasha-solomkina',
-      version: '1',
+      version: '1.0',
       year: 2025,
       contributor: 'Daria Solomkina',
       date_created: new Date().toISOString()
