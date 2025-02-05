@@ -5,9 +5,8 @@ import Export from './Export'
 import useStore from '../store/useStore'
 import { alpha } from '@mui/system'
 import { BackButton } from './Buttons'
-import generateCocoJson from '../utils/generateCocoJson'
-import { validateCOCOJSON } from '../services/validateCoco'
 import SuccessAlert, { ErrorExportAlert } from './Alert'
+import useExport from '../hooks/useExport'
 
 const CanvasApp = () => {
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -29,11 +28,12 @@ const CanvasApp = () => {
     bottom: number
   } | null>(null)
 
-  const [showSuccessAlert, setShowSuccessAlert] = useState(false)
-  const [showFailExportAlert, setShowFailExportAlert] = useState(false)
   const [actionHistory, setActionHistory] = useState<any[][]>([])
-
-  console.log('po;ygons', polygons)
+  const { handleExport, showSuccessAlert, showFailExportAlert } = useExport(
+    labels,
+    polygons,
+    image
+  )
 
   const onBackClick = () => {
     if (actionHistory.length === 0) return
@@ -241,28 +241,6 @@ const CanvasApp = () => {
     setPolygons,
     actionHistory
   ])
-
-  const handleExport = async () => {
-    if (!image) return
-    const cocoJSON = generateCocoJson(labels, image, polygons)
-
-    console.log('Generated COCO JSON:', cocoJSON)
-
-    const validationResult = await validateCOCOJSON(cocoJSON)
-    console.log('Validation Result:', validationResult)
-
-    if (!validationResult.message === 'Success') {
-      setShowSuccessAlert(true)
-      setTimeout(() => {
-        setShowSuccessAlert(false)
-      }, 3000)
-    } else {
-      setShowFailExportAlert(true)
-      setTimeout(() => {
-        setShowFailExportAlert(false)
-      }, 3000)
-    }
-  }
 
   return (
     <Paper
