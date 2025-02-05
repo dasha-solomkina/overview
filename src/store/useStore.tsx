@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import type { FabricObject } from 'fabric'
 
 export type Image = {
   height: number
@@ -17,9 +18,12 @@ export type Polygon = {
   points: { x: number; y: number }[]
 }
 
-type BrushStroke = {
+export type BrushStroke = {
+  id: string
   labelId: number
   points: { x: number; y: number }[]
+  object: FabricObject
+  timestamp: number
 }
 
 type StorePops = {
@@ -40,7 +44,10 @@ type StorePops = {
   setLabels: (labels: LabelProps[]) => void
   setChosenLabel: (labels: LabelProps | undefined) => void
   setPolygons: (polygon: Polygon) => void
-  addBrushStroke: (stroke: BrushStroke) => void
+  setBrushStrokes: (
+    strokes: BrushStroke[] | ((prev: BrushStroke[]) => BrushStroke[])
+  ) => void
+  undoBrushStroke: (id: string) => void
 
   setBrushSize: (brush: number) => void
   resetStore: () => void
@@ -77,8 +84,19 @@ const useStore = create<StorePops>((set) => ({
 
   setPolygons: (polygon) =>
     set((state) => ({ polygons: [...state.polygons, polygon] })),
-  addBrushStroke: (stroke) =>
-    set((state) => ({ brushStrokes: [...state.brushStrokes, stroke] })),
+  setBrushStrokes: (strokes) => {
+    set((state) => ({
+      brushStrokes:
+        typeof strokes === 'function'
+          ? strokes(state.brushStrokes) // Call the function with the previous state
+          : strokes // If it's an array, set it directly
+    }))
+  },
+
+  undoBrushStroke: (id: string) =>
+    set((state) => ({
+      brushStrokes: state.brushStrokes.filter((stroke) => stroke.id !== id)
+    })),
   setBrushSize: (brushSize) => set({ brushSize }),
 
   resetStore: () => {

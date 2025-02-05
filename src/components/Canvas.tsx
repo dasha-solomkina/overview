@@ -2,11 +2,13 @@ import { Box, Paper } from '@mui/material'
 import { Canvas, Circle, FabricImage, Line, PencilBrush, Polygon } from 'fabric'
 import { useEffect, useRef, useState } from 'react'
 import Export from './Export'
-import useStore from '../store/useStore'
+import useStore, { type BrushStroke } from '../store/useStore'
 import { alpha } from '@mui/system'
 import { BackButton } from './Buttons'
 import SuccessAlert, { ErrorExportAlert } from './Alert'
 import useExport from '../hooks/useExport'
+import type { TEvent } from '../EventTypeDefs'
+import { v4 as uuidv4 } from 'uuid'
 
 const CanvasApp = () => {
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -27,6 +29,10 @@ const CanvasApp = () => {
     right: number
     bottom: number
   } | null>(null)
+  const brushSize = useStore((state) => state.brushSize)
+  const brushStrokes = useStore((state) => state.brushStrokes)
+  const setBrushStrokes = useStore((state) => state.setBrushStrokes)
+  // const undoBrushStroke = useStore((state) => state.undoBrushStroke)
 
   const [actionHistory, setActionHistory] = useState<any[][]>([])
   const { handleExport, showSuccessAlert, showFailExportAlert } = useExport(
@@ -36,14 +42,21 @@ const CanvasApp = () => {
   )
 
   const onBackClick = () => {
-    if (actionHistory.length === 0) return
-
-    const lastAction = actionHistory[actionHistory.length - 1]
-    for (const object of lastAction) {
-      canvas?.remove(object)
+    const lastStroke = brushStrokes[brushStrokes.length - 1]
+    if (lastStroke) {
+      setBrushStrokes((prev) =>
+        prev.filter((stroke) => stroke.id !== lastStroke.id)
+      )
+      canvas?.remove(lastStroke.object) // Remove the stroke from the canvas
     }
-    setActionHistory((prevHistory) => prevHistory.slice(0, -1))
-    canvas?.renderAll()
+
+    // if (actionHistory.length === 0) return
+    // const lastAction = actionHistory[actionHistory.length - 1]
+    // for (const object of lastAction) {
+    //   canvas?.remove(object)
+    // }
+    // setActionHistory((prevHistory) => prevHistory.slice(0, -1))
+    // canvas?.renderAll()
   }
 
   useEffect(() => {
@@ -111,7 +124,7 @@ const CanvasApp = () => {
     if (tool === 'polygon' && canvas && chosenLabel && imageURL) {
       let tempLine: Line | null = null
 
-      const onMouseDown = (event: any) => {
+      const onMouseDown = (event: TEvent) => {
         if (!canvas || !imageBounds) return
 
         const pointer = canvas?.getScenePoint(event.e)
@@ -167,7 +180,7 @@ const CanvasApp = () => {
         }
       }
 
-      const onMouseMove = (event: any) => {
+      const onMouseMove = (event: TEvent) => {
         if (!tempLine || points.length === 0) return
         const pointer = canvas?.getScenePoint(event.e)
         if (pointer) {
@@ -179,7 +192,7 @@ const CanvasApp = () => {
       }
 
       // If the first point is clicked again, finalize the polygon
-      const onFirstDotClick = (event: any) => {
+      const onFirstDotClick = (event: TEvent) => {
         const pointer = canvas?.getScenePoint(event.e)
         if (pointer && points.length > 0) {
           const { x, y } = pointer
@@ -243,13 +256,31 @@ const CanvasApp = () => {
   ])
 
   useEffect(() => {
-    if (tool === 'brush' && canvas && chosenLabel && imageURL) {
+    if (tool && canvas && chosenLabel && imageURL) {
       canvas.isDrawingMode = true
       canvas.freeDrawingBrush = new PencilBrush(canvas)
-      canvas.freeDrawingBrush.width = 1
-      canvas.freeDrawingBrush.color = chosenLabel.color // Use chosen label color
+      canvas.freeDrawingBrush.width = brushSize
+      canvas.freeDrawingBrush.color = chosenLabel.color
       canvas.freeDrawingBrush.limitedToCanvasSize = true
-      console.log('freeDrawingBrush', canvas.freeDrawingBrush)
+
+      const onPathCreated = (event: TEvent) => {
+        const brushStroke = event.path
+
+        const strokeData: BrushStroke = {
+          id: uuidv4(),
+          labelId: chosenLabel.id,
+          points: brushStroke.path.map((point: XY) => ({
+            x: point.x,
+            y: point.y
+          })),
+          object: brushStroke,
+          timestamp: Date.now()
+        }
+
+        setBrushStrokes((prev: BrushStroke[]) => [...prev, strokeData])
+        console.log('brushStroke', brushStroke)
+      }
+      console.log('brushStrokes', brushStrokes)
 
       canvas.on('mouse:move', (event) => {
         const pointer = canvas.getScenePoint(event.e)
@@ -261,23 +292,20 @@ const CanvasApp = () => {
             y < imageBounds.top ||
             y > imageBounds.bottom
           ) {
-            canvas.isDrawingMode = false // Disable drawing when outside bounds
+            canvas.isDrawingMode = false
           } else {
-            canvas.isDrawingMode = true // Re-enable when inside bounds
+            canvas.isDrawingMode = true
           }
         }
       })
 
-      const annotations = []
-      // console.log('annotations', annotations)
+      // TODO move to types
+      interface XY {
+        x: number
+        y: number
+      }
 
       // Store brush strokes with class ID
-      const onPathCreated = (event) => {
-        const brushStroke = event.path
-        brushStroke.classId = chosenLabel.id // Assign class ID
-        annotations.push(brushStroke)
-        console.log('brushStroke', brushStroke)
-      }
 
       canvas.on('path:created', onPathCreated)
 
@@ -286,7 +314,15 @@ const CanvasApp = () => {
         canvas.off('path:created', onPathCreated)
       }
     }
-  }, [tool, canvas, chosenLabel, imageBounds, imageURL])
+  }, [
+    tool,
+    canvas,
+    chosenLabel,
+    imageBounds,
+    imageURL,
+    brushSize,
+    setBrushStrokes
+  ])
 
   return (
     <Paper
@@ -321,7 +357,8 @@ const CanvasApp = () => {
           title="Undo"
           ariaLabel="undo"
           onClick={onBackClick}
-          disabled={actionHistory?.length === 0}
+          // disabled={actionHistory?.length === 0}
+          disabled={false}
         />
         <Export onClick={handleExport} />
       </Box>
