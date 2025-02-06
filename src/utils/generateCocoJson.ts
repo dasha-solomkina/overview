@@ -71,7 +71,7 @@ const generateCocoJson = (
     images: [
       {
         license: 1,
-        file_name: 'example.jpg', // TODO
+        file_name: 'example.jpg',
         coco_url: 'http://example.com/images/image1.jpg',
         height: image.height,
         width: image.width,

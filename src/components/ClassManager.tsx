@@ -37,7 +37,6 @@ const LabelManager = () => {
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLButtonElement>(null)
 
-  // fix later
   const [anchorElEdit, setAnchorElEdit] = useState<null | HTMLElement>(null)
   const [openPopoverEdit, setOpenPopoverEdit] = useState<boolean>(false)
   const [editedTitle, setEditedTitle] = useState<string>('Initial Title')

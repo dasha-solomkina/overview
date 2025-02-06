@@ -4,6 +4,7 @@ import type { FabricObject } from 'fabric'
 export type Image = {
   height: number
   width: number
+  name?: string
 }
 
 export type LabelProps = {
@@ -50,7 +51,6 @@ type StorePops = {
   setBrushStrokes: (
     strokes: BrushStroke[] | ((prev: BrushStroke[]) => BrushStroke[])
   ) => void
-  undoBrushStroke: (id: string) => void
 
   setBrushSize: (brush: number) => void
   resetStore: () => void
@@ -62,8 +62,8 @@ const useStore = create<StorePops>((set) => ({
   tool: undefined,
   editLabel: undefined,
   labels: [
-    { id: 10293847, name: 'Label 1', color: '#FF0000' },
-    { id: 10293832, name: 'Label 2', color: '#00FF00' }
+    { id: 10293847, name: 'Building', color: '#9dad75' },
+    { id: 10293832, name: 'Car', color: '#64a8c7' }
   ],
   chosenLabel: undefined,
   polygons: [],
@@ -92,10 +92,6 @@ const useStore = create<StorePops>((set) => ({
     }))
   },
 
-  undoBrushStroke: (id: string) =>
-    set((state) => ({
-      brushStrokes: state.brushStrokes.filter((stroke) => stroke.id !== id)
-    })),
   setBrushSize: (brushSize) => set({ brushSize }),
 
   resetStore: () => {

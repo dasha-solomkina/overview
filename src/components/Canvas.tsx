@@ -1,5 +1,13 @@
 import { Box, Paper } from '@mui/material'
-import { Canvas, Circle, FabricImage, Line, PencilBrush, Polygon } from 'fabric'
+import {
+  Canvas,
+  Circle,
+  FabricImage,
+  FabricText,
+  Line,
+  PencilBrush,
+  Polygon
+} from 'fabric'
 import { useEffect, useRef, useState } from 'react'
 import Export from './Export'
 import useStore, { type BrushStroke } from '../store/useStore'
@@ -7,9 +15,8 @@ import { alpha } from '@mui/system'
 import { BackButton } from './Buttons'
 import SuccessAlert, { ErrorExportAlert } from './Alert'
 import useExport from '../hooks/useExport'
-import type { TEvent } from '../EventTypeDefs'
 import { v4 as uuidv4 } from 'uuid'
-import type { FabricObject } from 'fabric'
+import type { FabricObject, TBrushEventData } from 'fabric'
 
 interface XY {
   x: number
@@ -39,9 +46,9 @@ const CanvasApp = () => {
   const brushSize = useStore((state) => state.brushSize)
   const brushStrokes = useStore((state) => state.brushStrokes)
   const setBrushStrokes = useStore((state) => state.setBrushStrokes)
-  // const undoBrushStroke = useStore((state) => state.undoBrushStroke)
 
   const [actionHistory, setActionHistory] = useState<FabricObject[][]>([])
+
   const { handleExport, showSuccessAlert, showFailExportAlert } = useExport(
     labels,
     polygons,
@@ -54,7 +61,7 @@ const CanvasApp = () => {
       setBrushStrokes((prev) =>
         prev.filter((stroke) => stroke.id !== lastStroke.id)
       )
-      canvas?.remove(lastStroke.object) // Remove the stroke from the canvas
+      canvas?.remove(lastStroke.object)
     }
 
     if (actionHistory.length === 0) return
@@ -65,6 +72,22 @@ const CanvasApp = () => {
     setActionHistory((prevHistory) => prevHistory.slice(0, -1))
     canvas?.renderAll()
   }
+
+  useEffect(() => {
+    if (canvas && !imageURL) {
+      const text = new FabricText('Please upload an image to get started', {
+        left: canvas.getWidth() / 2,
+        top: canvas.getHeight() / 2,
+        fontSize: 26,
+        fill: '#333',
+        originX: 'center',
+        originY: 'center'
+      })
+
+      canvas.add(text)
+      canvas.renderAll()
+    }
+  }, [canvas, imageURL])
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -102,8 +125,8 @@ const CanvasApp = () => {
         const scale = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight)
         img.scale(scale)
 
-        canvas.clear() // remove previous images
-        setPoints([]) // reset the points
+        canvas.clear()
+        setPoints([])
         canvas.add(img)
         canvas.centerObject(img)
         img.setCoords()
@@ -126,12 +149,11 @@ const CanvasApp = () => {
       .catch((error) => console.error('Failed to load image:', error))
   }, [imageURL, canvas, setImage])
 
-  // Handle tool change (Polygon tool)
   useEffect(() => {
     if (tool === 'polygon' && canvas && chosenLabel && imageURL) {
       let tempLine: Line | null = null
 
-      const onMouseDown = (event: TEvent) => {
+      const onMouseDown = (event: TBrushEventData) => {
         if (!canvas || !imageBounds) return
 
         const pointer = canvas?.getScenePoint(event.e)
@@ -146,7 +168,6 @@ const CanvasApp = () => {
             return
           }
 
-          // Create a dot at the clicked position
           const dot = new Circle({
             radius: 3,
             fill: chosenLabel?.color,
@@ -161,7 +182,6 @@ const CanvasApp = () => {
 
           setPoints((prevPoints) => [...prevPoints, { x, y }])
 
-          // Workaround the polygon for undo button
           const isPolygonBefore =
             actionHistory.length > 1 &&
             actionHistory[actionHistory.length - 1][0].type === 'polygon'
@@ -170,7 +190,6 @@ const CanvasApp = () => {
             setActionHistory((prevHistory) => [...prevHistory, [dot]])
           }
 
-          // If there's a previous point, draw a line connecting it to the new point
           if (points.length > 0) {
             const lastPoint = points[points.length - 1]
             tempLine = new Line([lastPoint.x, lastPoint.y, x, y], {
@@ -182,29 +201,30 @@ const CanvasApp = () => {
               hasControls: false
             })
             canvas?.add(tempLine)
-            setActionHistory((prevHistory) => [...prevHistory, [dot, tempLine]])
+            setActionHistory((prevHistory) => [
+              ...prevHistory,
+              [dot, tempLine].filter((item) => item !== null)
+            ])
           }
         }
       }
 
-      const onMouseMove = (event: TEvent) => {
+      const onMouseMove = (event: TBrushEventData) => {
         if (!tempLine || points.length === 0) return
         const pointer = canvas?.getScenePoint(event.e)
         if (pointer) {
           const { x, y } = pointer
 
-          tempLine.set({ x2: x, y2: y }) // Update the line end point to current mouse position
+          tempLine.set({ x2: x, y2: y })
           canvas?.renderAll()
         }
       }
 
-      // If the first point is clicked again, finalize the polygon
-      const onFirstDotClick = (event: TEvent) => {
+      const onFirstDotClick = (event: TBrushEventData) => {
         const pointer = canvas?.getScenePoint(event.e)
         if (pointer && points.length > 0) {
           const { x, y } = pointer
 
-          // Check if the pointer is close to the first point
           const firstPoint = points[0]
           const distance = Math.sqrt(
             (x - firstPoint.x) ** 2 + (y - firstPoint.y) ** 2
@@ -215,7 +235,6 @@ const CanvasApp = () => {
               console.error('imageBounds is not defined')
               return
             }
-            // Clicked near the first point, close the polygon
             const polygon = new Polygon(points, {
               fill: alpha(chosenLabel.color, 0.2),
               stroke: chosenLabel?.color,
@@ -270,7 +289,9 @@ const CanvasApp = () => {
       canvas.freeDrawingBrush.color = chosenLabel.color
       canvas.freeDrawingBrush.limitedToCanvasSize = true
 
-      const onPathCreated = (event: TEvent) => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore: Disabling TS check for event typing
+      const onPathCreated = (event: any) => {
         const brushStroke = event.path
 
         const strokeData: BrushStroke = {
@@ -304,10 +325,6 @@ const CanvasApp = () => {
           }
         }
       })
-
-      // TODO move to types
-
-      // Store brush strokes with class ID
 
       canvas.on('path:created', onPathCreated)
 

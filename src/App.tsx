@@ -7,14 +7,7 @@ import Canvas from './components/Canvas'
 const MyContainer = ({ children }: { children: React.ReactNode }) => {
   return (
     <Box bgcolor="background.default">
-      <Container
-        sx={
-          {
-            // height: '100vh',
-            // border: '1px solid black' // TODO: remove
-          }
-        }
-      >
+      <Container maxWidth="lg">
         <Box
           display="flex"
           flexDirection="column"
