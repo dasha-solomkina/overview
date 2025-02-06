@@ -1,28 +1,25 @@
 import { Box, Paper, Typography } from '@mui/material'
 import { Canvas, Circle, FabricImage, Line, PencilBrush, Polygon } from 'fabric'
 import { useEffect, useRef, useState } from 'react'
-import Export from './Export'
-import useStore, { type BrushStroke } from '../store/useStore'
+import Export from './atoms/Export'
+import useStore from '../store/useStore'
+import type { BrushStroke, XY } from '../types/type'
 import { alpha } from '@mui/system'
-import { BackButton } from './Buttons'
-import SuccessAlert, { ErrorExportAlert } from './Alert'
+import { BackButton } from './atoms/Buttons'
+import SuccessAlert, { ErrorExportAlert } from './atoms/Alert'
 import useExport from '../hooks/useExport'
 import { v4 as uuidv4 } from 'uuid'
 import type { FabricObject, TBrushEventData } from 'fabric'
-
-interface XY {
-  x: number
-  y: number
-}
+import useTools from '../store/useTools'
 
 const CanvasApp = () => {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [canvas, setCanvas] = useState<Canvas | null>(null)
   const imageURL = useStore((state) => state.imageURL)
-  const tool = useStore((state) => state.tool)
-  const setPolygons = useStore((state) => state.setPolygons)
-  const polygons = useStore((state) => state.polygons)
+  const tool = useTools((state) => state.tool)
+  const setPolygons = useTools((state) => state.setPolygons)
+  const polygons = useTools((state) => state.polygons)
   const labels = useStore((state) => state.labels)
   const chosenLabel = useStore((state) => state.chosenLabel)
   const setImage = useStore((state) => state.setImage)
@@ -35,9 +32,9 @@ const CanvasApp = () => {
     bottom: number
   } | null>(null)
 
-  const brushSize = useStore((state) => state.brushSize)
-  const brushStrokes = useStore((state) => state.brushStrokes)
-  const setBrushStrokes = useStore((state) => state.setBrushStrokes)
+  const brushSize = useTools((state) => state.brushSize)
+  const brushStrokes = useTools((state) => state.brushStrokes)
+  const setBrushStrokes = useTools((state) => state.setBrushStrokes)
 
   const [actionHistory, setActionHistory] = useState<FabricObject[][]>([])
 

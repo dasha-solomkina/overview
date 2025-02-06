@@ -12,10 +12,11 @@ import {
   CleaningServicesRounded
 } from '@mui/icons-material'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
-import NavbarButton from './Buttons'
+import NavbarButton from './atoms/Buttons'
 import useStore from '../store/useStore'
 import { useState } from 'react'
-import Slider from './Slider'
+import Slider from './atoms/Slider'
+import useTools from '../store/useTools'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -29,10 +30,26 @@ const VisuallyHiddenInput = styled('input')({
   width: 1
 })
 
+const containerStyles = {
+  display: 'flex',
+  gap: 1,
+  bgcolor: 'background.paper',
+  border: '1px solid rgba(0, 0, 0, 0.12)',
+  borderRadius: 2,
+  boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.12)',
+  py: 1,
+  px: 2,
+  minWidth: 240,
+  overflow: 'hidden',
+  flexWrap: { xl: 'nowrap', sm: 'wrap' },
+  alignItems: { xs: 'center', sm: 'center' }
+}
+
 const Navbar = () => {
   const setImageURL = useStore((state) => state.setImageURL)
-  const setTool = useStore((state) => state.setTool)
+  const setTool = useTools((state) => state.setTool)
   const resetStore = useStore((state) => state.resetStore)
+  const resetTools = useTools((state) => state.resetTools)
   const [anchorEl, setAnchorEl] = useState<null | HTMLButtonElement>(null)
   const onClose = () => {
     setAnchorEl(null)
@@ -43,6 +60,7 @@ const Navbar = () => {
 
   const onNewImgClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     resetStore()
+    resetTools()
     const file = event.target.files?.[0]
     if (!file) return
     const reader = new FileReader()
@@ -61,23 +79,7 @@ const Navbar = () => {
   }
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        gap: 1,
-        bgcolor: 'background.paper',
-        border: '1px solid rgba(0, 0, 0, 0.12)',
-        borderRadius: 2,
-        boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.12)',
-        py: 1,
-        px: 2,
-        minWidth: 240,
-        overflow: 'hidden',
-        // flexDirection: { xs: 'column', sm: 'row' },
-        flexWrap: { xl: 'nowrap', sm: 'wrap' },
-        alignItems: { xs: 'center', sm: 'center' }
-      }}
-    >
+    <Box sx={containerStyles}>
       <NavbarButton
         icon={PolylineRounded}
         title="Polygon"

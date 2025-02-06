@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { validateCOCOJSON } from '../services/validateCoco'
-import type { LabelProps, Polygon, Image } from '../store/useStore'
+import type { LabelProps, Polygon, Image } from '../types/type'
 import generateCocoJson from '../utils/generateCocoJson'
 
 const useExport = (

@@ -1,4 +1,4 @@
-import type { BrushStroke } from '../store/useStore'
+import type { BrushStroke } from '../types/type'
 
 // Converts a binary mask to RLE format
 export const encodeRLE = (mask: number[]): number[] => {

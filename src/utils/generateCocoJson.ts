@@ -3,8 +3,9 @@ import {
   generateRandomId,
   getBoundingBox
 } from './calculations'
-// import type { LabelProps, Image, Polygon, BrushStroke } from '../store/useStore'
-import type { LabelProps, Image, Polygon } from '../store/useStore'
+// import type { Image, LabelProps, Polygon, BrushStroke } from '../types/type'
+import type { Image, LabelProps, Polygon } from '../types/type'
+
 // import { convertBrushStrokesToRLE, rleToPolygon } from './encodeRLE'
 
 const generateCocoJson = (

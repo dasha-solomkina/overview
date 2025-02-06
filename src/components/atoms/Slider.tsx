@@ -1,9 +1,9 @@
 import { Slider as SimpleSlider, Box } from '@mui/material'
-import useStore from '../store/useStore'
+import useTools from '../../store/useTools'
 
 const Slider = () => {
-  const brushSize = useStore((state) => state.brushSize)
-  const setBrushSize = useStore((state) => state.setBrushSize)
+  const brushSize = useTools((state) => state.brushSize)
+  const setBrushSize = useTools((state) => state.setBrushSize)
   const calculateThumbSize = () => {
     const minSize = 10
     const maxSize = 16

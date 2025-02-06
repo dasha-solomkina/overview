@@ -13,10 +13,11 @@ import {
   Typography
 } from '@mui/material'
 import { useState } from 'react'
-import NavbarButton from './Buttons'
-import useStore, { type LabelProps } from '../store/useStore'
+import NavbarButton from './atoms/Buttons'
+import useStore from '../store/useStore'
+import type { LabelProps } from '../types/type'
 import { generateRandomId } from '../utils/calculations'
-import { ErrorColorAlert } from './Alert'
+import { ErrorColorAlert } from './atoms/Alert'
 
 const EditDeleteButton = styled(IconButton)(({ theme }) => ({
   opacity: 0,

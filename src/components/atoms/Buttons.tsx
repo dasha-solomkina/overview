@@ -1,7 +1,7 @@
 import type { SvgIconComponent } from '@mui/icons-material'
 import { IconButton, styled, Tooltip } from '@mui/material'
-import useStore from '../store/useStore'
 import { UndoRounded } from '@mui/icons-material'
+import useTools from '../../store/useTools'
 
 const StyledBackButton = styled(IconButton)(() => ({
   width: 'fit-content',
@@ -74,7 +74,7 @@ const NavbarButton = ({
   onClick,
   disabled
 }: StyledNavButton) => {
-  const tool = useStore((state) => state.tool)
+  const tool = useTools((state) => state.tool)
 
   return (
     <Tooltip title={title} arrow>
