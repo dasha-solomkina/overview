@@ -46,7 +46,6 @@ export const BackButton = ({
 }
 
 const StyledIconNavButton = styled(IconButton)(({ theme }) => ({
-  // borderRadius: 2, // Make it square
   width: 44,
   height: 44,
 
@@ -65,13 +64,15 @@ type StyledNavButton = {
   title: string
   ariaLabel: string
   onClick: (event: React.MouseEvent<HTMLButtonElement>) => void
+  disabled?: boolean
 }
 
 const NavbarButton = ({
   icon: Icon,
   title,
   ariaLabel,
-  onClick
+  onClick,
+  disabled
 }: StyledNavButton) => {
   const tool = useStore((state) => state.tool)
 
@@ -83,6 +84,7 @@ const NavbarButton = ({
         size="medium"
         onClick={onClick}
         className={tool === ariaLabel ? 'chosen' : ''}
+        disabled={disabled}
       >
         <Icon fontSize="inherit" />
       </StyledIconNavButton>

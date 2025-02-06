@@ -9,6 +9,12 @@ import SuccessAlert, { ErrorExportAlert } from './Alert'
 import useExport from '../hooks/useExport'
 import type { TEvent } from '../EventTypeDefs'
 import { v4 as uuidv4 } from 'uuid'
+import type { FabricObject } from 'fabric'
+
+interface XY {
+  x: number
+  y: number
+}
 
 const CanvasApp = () => {
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -29,12 +35,13 @@ const CanvasApp = () => {
     right: number
     bottom: number
   } | null>(null)
+
   const brushSize = useStore((state) => state.brushSize)
   const brushStrokes = useStore((state) => state.brushStrokes)
   const setBrushStrokes = useStore((state) => state.setBrushStrokes)
   // const undoBrushStroke = useStore((state) => state.undoBrushStroke)
 
-  const [actionHistory, setActionHistory] = useState<any[][]>([])
+  const [actionHistory, setActionHistory] = useState<FabricObject[][]>([])
   const { handleExport, showSuccessAlert, showFailExportAlert } = useExport(
     labels,
     polygons,
@@ -50,13 +57,13 @@ const CanvasApp = () => {
       canvas?.remove(lastStroke.object) // Remove the stroke from the canvas
     }
 
-    // if (actionHistory.length === 0) return
-    // const lastAction = actionHistory[actionHistory.length - 1]
-    // for (const object of lastAction) {
-    //   canvas?.remove(object)
-    // }
-    // setActionHistory((prevHistory) => prevHistory.slice(0, -1))
-    // canvas?.renderAll()
+    if (actionHistory.length === 0) return
+    const lastAction = actionHistory[actionHistory.length - 1]
+    for (const object of lastAction) {
+      canvas?.remove(object)
+    }
+    setActionHistory((prevHistory) => prevHistory.slice(0, -1))
+    canvas?.renderAll()
   }
 
   useEffect(() => {
@@ -68,7 +75,7 @@ const CanvasApp = () => {
         height
       })
 
-      initCanvas.backgroundColor = '#e5e5e5' // TODO: change to white later
+      initCanvas.backgroundColor = '#fff'
       initCanvas.renderAll()
 
       setCanvas(initCanvas)
@@ -274,13 +281,12 @@ const CanvasApp = () => {
             y: point.y
           })),
           object: brushStroke,
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          path: brushStroke.path
         }
 
         setBrushStrokes((prev: BrushStroke[]) => [...prev, strokeData])
-        console.log('brushStroke', brushStroke)
       }
-      console.log('brushStrokes', brushStrokes)
 
       canvas.on('mouse:move', (event) => {
         const pointer = canvas.getScenePoint(event.e)
@@ -300,10 +306,6 @@ const CanvasApp = () => {
       })
 
       // TODO move to types
-      interface XY {
-        x: number
-        y: number
-      }
 
       // Store brush strokes with class ID
 
@@ -357,8 +359,7 @@ const CanvasApp = () => {
           title="Undo"
           ariaLabel="undo"
           onClick={onBackClick}
-          // disabled={actionHistory?.length === 0}
-          disabled={false}
+          disabled={actionHistory?.length === 0}
         />
         <Export onClick={handleExport} />
       </Box>

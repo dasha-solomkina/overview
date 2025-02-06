@@ -10,6 +10,17 @@ export const getBoundingBox = (points: { x: number; y: number }[]) => {
   return [xmin, ymin, xmax - xmin, ymax - ymin]
 }
 
+export const calculateBoundingBox = (
+  points: { x: number; y: number }[]
+): number[] => {
+  const minX = Math.min(...points.map((p) => p.x))
+  const minY = Math.min(...points.map((p) => p.y))
+  const maxX = Math.max(...points.map((p) => p.x))
+  const maxY = Math.max(...points.map((p) => p.y))
+
+  return [minX, minY, maxX - minX, maxY - minY] // Format: [x, y, width, height]
+}
+
 export const calculatePolygonArea = (points: { x: number; y: number }[]) => {
   let area = 0
   const n = points.length

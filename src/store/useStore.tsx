@@ -18,12 +18,15 @@ export type Polygon = {
   points: { x: number; y: number }[]
 }
 
+export type Path = [string, number, number, number?, number?][]
+
 export type BrushStroke = {
   id: string
   labelId: number
   points: { x: number; y: number }[]
   object: FabricObject
   timestamp: number
+  path: Path
 }
 
 type StorePops = {
@@ -52,8 +55,6 @@ type StorePops = {
   setBrushSize: (brush: number) => void
   resetStore: () => void
 }
-
-// TODO: Brush stroke
 
 const useStore = create<StorePops>((set) => ({
   imageURL: undefined,
@@ -87,9 +88,7 @@ const useStore = create<StorePops>((set) => ({
   setBrushStrokes: (strokes) => {
     set((state) => ({
       brushStrokes:
-        typeof strokes === 'function'
-          ? strokes(state.brushStrokes) // Call the function with the previous state
-          : strokes // If it's an array, set it directly
+        typeof strokes === 'function' ? strokes(state.brushStrokes) : strokes
     }))
   },
 
@@ -104,7 +103,6 @@ const useStore = create<StorePops>((set) => ({
       imageURL: undefined,
       tool: undefined,
       editLabel: undefined,
-      // labels: [],
       chosenLabel: undefined,
       polygons: [],
       brushStrokes: [],

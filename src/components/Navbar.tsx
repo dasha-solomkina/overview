@@ -3,7 +3,6 @@ import {
   PolylineRounded,
   BrushRounded,
   CleaningServicesRounded
-  // UndoRounded
 } from '@mui/icons-material'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import NavbarButton from './Buttons'
@@ -23,7 +22,6 @@ const VisuallyHiddenInput = styled('input')({
   width: 1
 })
 
-// const Navbar = () => {
 const Navbar = () => {
   const setImageURL = useStore((state) => state.setImageURL)
   const setTool = useStore((state) => state.setTool)
@@ -82,6 +80,7 @@ const Navbar = () => {
         title="Erase"
         ariaLabel="erase"
         onClick={() => setTool('erase')}
+        disabled
       />
 
       <Button

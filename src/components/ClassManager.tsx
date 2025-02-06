@@ -1,6 +1,7 @@
-import { AddCircleOutlineRounded, Edit } from '@mui/icons-material'
+import { AddCircleOutlineRounded, Edit, Delete } from '@mui/icons-material'
 import {
   Box,
+  Button,
   Divider,
   IconButton,
   List,
@@ -12,12 +13,12 @@ import {
   Typography
 } from '@mui/material'
 import { useState } from 'react'
-import { HexColorPicker } from 'react-colorful'
 import NavbarButton from './Buttons'
 import useStore, { type LabelProps } from '../store/useStore'
 import { generateRandomId } from '../utils/calculations'
+import { ErrorColorAlert } from './Alert'
 
-const EditButton = styled(IconButton)(({ theme }) => ({
+const EditDeleteButton = styled(IconButton)(({ theme }) => ({
   opacity: 0,
   transition: 'opacity 0.2s',
   color: theme.palette.secondary.main
@@ -31,13 +32,42 @@ const LabelManager = () => {
   const chosenLabel = useStore((state) => state.chosenLabel)
   const setChosenLabel = useStore((state) => state.setChosenLabel)
 
+  const [text, setText] = useState('')
+  const [color, setColor] = useState('#000000')
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLButtonElement>(null)
-  const [currentColor, setCurrentColor] = useState('#FF0000')
 
   // fix later
   const [anchorElEdit, setAnchorElEdit] = useState<null | HTMLElement>(null)
   const [openPopoverEdit, setOpenPopoverEdit] = useState<boolean>(false)
   const [editedTitle, setEditedTitle] = useState<string>('Initial Title')
+  const [showColorAlert, setShowColorAlert] = useState(false)
+
+  const onAddClassClick = () => {
+    const isColorInUse = labels.some((label) => label.color === color)
+
+    if (!isColorInUse) {
+      const newLabel = {
+        id: generateRandomId(8),
+        name: text,
+        color: color
+      }
+
+      setLabels([...labels, newLabel])
+      setAnchorEl(null)
+      setText('')
+    } else {
+      setShowColorAlert(true)
+      setTimeout(() => {
+        setShowColorAlert(false)
+      }, 3000)
+    }
+  }
+
+  const onDeleteLabel = (LabelItem: LabelProps) => {
+    const updatedLabels = labels.filter((label) => label.id !== LabelItem.id)
+    setLabels(updatedLabels)
+  }
 
   const onPopoverOpen = (
     event: React.MouseEvent<HTMLElement>,
@@ -72,38 +102,13 @@ const LabelManager = () => {
     }
   }
 
-  const onColorClick = (
-    event: React.MouseEvent<HTMLButtonElement>,
-    LabelItem: LabelProps
-  ) => {
+  const onColorClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
-    setEditLabel(LabelItem)
-    setCurrentColor(LabelItem.color)
-  }
-
-  const onColorChange = (color: string) => {
-    setCurrentColor(color)
-    setLabels(
-      labels.map((label) =>
-        label.id === editLabel?.id ? { ...label, color } : label
-      )
-    )
   }
 
   const onClose = () => {
     setAnchorEl(null)
   }
-
-  const onNewLabelClick = () => {
-    const newLabel = {
-      id: generateRandomId(8),
-      name: 'New Label (to edit)',
-      color: '#0000FF'
-    }
-    setLabels([...labels, newLabel])
-  }
-
-  //  TODO: add the check for the color
 
   return (
     <Box
@@ -122,7 +127,7 @@ const LabelManager = () => {
           icon={AddCircleOutlineRounded}
           title="Add Label"
           ariaLabel="addLabel"
-          onClick={onNewLabelClick}
+          onClick={(e) => onColorClick(e)}
         />
       </Box>
       <Divider sx={{ mr: 2 }} />
@@ -134,8 +139,9 @@ const LabelManager = () => {
             sx={{
               display: 'flex',
               alignItems: 'center',
-              '&:hover .edit-icon': { opacity: 1 },
+              '&:hover .editdelete-icon': { opacity: 1 },
               borderRadius: 2,
+
               cursor: 'pointer',
               backgroundColor:
                 chosenLabel?.id === LabelItem.id
@@ -147,31 +153,33 @@ const LabelManager = () => {
             <ListItemText
               primary={LabelItem.name}
               sx={{
-                overflow: 'hidden',
-                whiteSpace: 'nowrap',
-                textOverflow: 'ellipsis' // TODO: fix later
-              }}
-            />
-            <IconButton
-              disableRipple
-              onClick={(e) => onColorClick(e, LabelItem)}
-              sx={{
-                backgroundColor: `${LabelItem.color}`,
-                width: 12,
-                height: 12,
-                borderRadius: '50%',
+                '& .MuiTypography-root': {
+                  fontWeight: 600
+                },
+                color: LabelItem.color,
                 marginRight: 1,
-                padding: 0
+                overflow: 'hidden',
+                whiteSpace: 'nowrap'
               }}
             />
-            <EditButton
-              className="edit-icon"
+
+            <EditDeleteButton
+              className="editdelete-icon"
               disableRipple
               size="small"
               onClick={(e) => onPopoverOpen(e, LabelItem)}
             >
               <Edit fontSize="inherit" />
-            </EditButton>
+            </EditDeleteButton>
+
+            <EditDeleteButton
+              className="editdelete-icon"
+              disableRipple
+              size="small"
+              onClick={() => onDeleteLabel(LabelItem)}
+            >
+              <Delete fontSize="inherit" />
+            </EditDeleteButton>
           </ListItem>
         ))}
       </List>
@@ -188,9 +196,6 @@ const LabelManager = () => {
         <TextField
           value={editedTitle}
           onChange={onTitleChange}
-          sx={{
-            padding: '10px'
-          }}
           onKeyDown={onKeyDown}
           onBlur={onPopoverClose}
         />
@@ -208,8 +213,43 @@ const LabelManager = () => {
           }
         }}
       >
-        <HexColorPicker color={currentColor} onChange={onColorChange} />
+        <Box
+          sx={{
+            padding: 2,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2
+          }}
+        >
+          <TextField
+            label="Enter label name"
+            variant="outlined"
+            required
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            size="small"
+          />
+
+          <TextField
+            label="Choose color"
+            type="color"
+            value={color}
+            onChange={(e) => setColor(e.target.value)}
+            variant="outlined"
+            sx={{
+              padding: 0,
+              '& .MuiInputBase-input': {
+                cursor: 'pointer',
+                padding: 1
+              }
+            }}
+          />
+          <Button onClick={onAddClassClick} variant="contained">
+            Add label
+          </Button>
+        </Box>
       </Popover>
+      {showColorAlert && <ErrorColorAlert />}
     </Box>
   )
 }
