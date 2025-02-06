@@ -1,4 +1,11 @@
-import { Box, Button, Popover, styled } from '@mui/material'
+import {
+  Box,
+  Button,
+  Popover,
+  styled,
+  useMediaQuery,
+  useTheme
+} from '@mui/material'
 import {
   PolylineRounded,
   BrushRounded,
@@ -31,6 +38,9 @@ const Navbar = () => {
     setAnchorEl(null)
   }
 
+  const theme = useTheme()
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'))
+
   const onNewImgClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     resetStore()
     const file = event.target.files?.[0]
@@ -60,7 +70,12 @@ const Navbar = () => {
         borderRadius: 2,
         boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.12)',
         py: 1,
-        px: 2
+        px: 2,
+        minWidth: 240,
+        overflow: 'hidden',
+        // flexDirection: { xs: 'column', sm: 'row' },
+        flexWrap: { xl: 'nowrap', sm: 'wrap' },
+        alignItems: { xs: 'center', sm: 'center' }
       }}
     >
       <NavbarButton
@@ -88,9 +103,9 @@ const Navbar = () => {
         sx={{ marginLeft: 'auto' }}
         variant="contained"
         tabIndex={-1}
-        startIcon={<CloudUploadIcon />}
+        startIcon={<CloudUploadIcon sx={{ marginLeft: 1 }} />}
       >
-        Upload files
+        {!isSmallScreen && 'Upload image'}
         <VisuallyHiddenInput
           type="file"
           accept="image/*"

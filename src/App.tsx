@@ -26,7 +26,13 @@ function App() {
   return (
     <MyContainer>
       <Navbar />
-      <Box display="flex" width="100%" height="80%" gap={1}>
+      <Box
+        display="flex"
+        width="100%"
+        height="80%"
+        gap={1}
+        sx={{ flexDirection: { xs: 'column', sm: 'row' } }}
+      >
         <ClassManager />
         <Canvas />
       </Box>

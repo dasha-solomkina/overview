@@ -115,7 +115,9 @@ const LabelManager = () => {
         display: 'flex',
         flexDirection: 'column',
         gap: 1,
-        width: '20%'
+        width: { xs: '100%', sm: '20%' },
+        flexShrink: 0,
+        minWidth: 240
       }}
     >
       <Box display="flex" alignItems="center" justifyContent="space-between">

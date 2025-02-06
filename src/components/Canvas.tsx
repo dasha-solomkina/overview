@@ -1,13 +1,5 @@
-import { Box, Paper } from '@mui/material'
-import {
-  Canvas,
-  Circle,
-  FabricImage,
-  FabricText,
-  Line,
-  PencilBrush,
-  Polygon
-} from 'fabric'
+import { Box, Paper, Typography } from '@mui/material'
+import { Canvas, Circle, FabricImage, Line, PencilBrush, Polygon } from 'fabric'
 import { useEffect, useRef, useState } from 'react'
 import Export from './Export'
 import useStore, { type BrushStroke } from '../store/useStore'
@@ -72,22 +64,6 @@ const CanvasApp = () => {
     setActionHistory((prevHistory) => prevHistory.slice(0, -1))
     canvas?.renderAll()
   }
-
-  useEffect(() => {
-    if (canvas && !imageURL) {
-      const text = new FabricText('Please upload an image to get started', {
-        left: canvas.getWidth() / 2,
-        top: canvas.getHeight() / 2,
-        fontSize: 26,
-        fill: '#333',
-        originX: 'center',
-        originY: 'center'
-      })
-
-      canvas.add(text)
-      canvas.renderAll()
-    }
-  }, [canvas, imageURL])
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -351,7 +327,9 @@ const CanvasApp = () => {
         flex: 1,
         borderRadius: 2,
         padding: 2,
-        gap: 3
+        gap: 3,
+        minWidth: 240,
+        maxHeight: { xs: 400, sm: 'none' }
       }}
     >
       <Box
@@ -363,6 +341,21 @@ const CanvasApp = () => {
           overflow: 'hidden'
         }}
       >
+        {!imageURL && (
+          <Typography
+            sx={{
+              fontSize: {
+                xs: '0.8rem',
+                sm: '1.1rem'
+              },
+              color: '#c3c3c3',
+              justifySelf: 'center',
+              fontWeight: 600
+            }}
+          >
+            Please upload an image to get started
+          </Typography>
+        )}
         <canvas id="canvas" ref={canvasRef} />
       </Box>
       <Box
