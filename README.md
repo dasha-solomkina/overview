@@ -1,6 +1,6 @@
 # Semantic Segmentation Labeling Tool
 
-This project was developed as part of the Overview.ai front-end take-home test. The objective was to create a semantic segmentation labeling tool that enables users to annotate data interactively, either through brush or polygon annotation modes. The tool allows users to upload images, annotate them with configurable classes, and export the results in COCO format. The design is fully responsive to ensure usability across various screen sizes.
+The objective was of this project was to create a semantic segmentation labeling tool that enables users to annotate data interactively, either through brush or polygon annotation modes. The tool allows users to upload images, annotate them with configurable classes, and export the results in COCO format. The design is fully responsive to ensure usability across various screen sizes.
 
 
 <img src="https://github.com/user-attachments/assets/bcd737b3-9d7a-4281-bb4b-b3027db1694e" alt="image" height="250"/>
